@@ -67,17 +67,14 @@
     transition-property: background-color, transform, box-shadow;
     transition-duration: 0.2s;
     transition-timing-function: ease-in-out;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .back-button:hover {
     background-color: rgb(51, 51, 51);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .back-button:active {
     background-color: rgb(17, 17, 17);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .informacion-juego {
