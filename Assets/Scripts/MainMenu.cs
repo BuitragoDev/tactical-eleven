@@ -18,9 +18,31 @@ namespace TacticalEleven.Scripts
             root = uiDocument.rootVisualElement;
 
             // Iconos del menú
+            var managerMode = root.Q<VisualElement>(Constants.MANAGER_MODE_BUTTON);
+            var careerMode = root.Q<VisualElement>(Constants.CAREER_MODE_BUTTON);
+            var settings = root.Q<VisualElement>(Constants.SETTINGS_BUTTON);
+            var editor = root.Q<VisualElement>(Constants.EDITOR_BUTTON);
+
             var exitIcon = root.Q<VisualElement>(Constants.EXIT_BUTTON);
             var creditsIcon = root.Q<VisualElement>(Constants.CREDITS_BUTTON);
             var webIcon = root.Q<VisualElement>(Constants.WEB_BUTTON);
+
+            // --- MODO MANAGER ICON ---
+            managerMode.RegisterCallback<ClickEvent>((evt) =>
+            {
+                if (SceneLoader.Instance != null && SceneLoader.Instance.transitionSFX != null && AudioManager.Instance != null)
+                    AudioManager.Instance.PlaySFX(SceneLoader.Instance.transitionSFX);
+
+                // Cambiar a la escena de Modo Manager
+                if (SceneLoader.Instance != null)
+                {
+                    SceneLoader.Instance.LoadScene(Constants.CREATE_MANAGER_SCENE);
+                }
+                else
+                {
+                    Debug.LogWarning("SceneLoader.Instance no encontrado. Asegúrate de que exista en la escena inicial.");
+                }
+            });
 
             // --- EXIT ICON ---
             exitIcon.RegisterCallback<ClickEvent>((evt) =>

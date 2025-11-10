@@ -1,66 +1,215 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System;
+using System.Text.RegularExpressions;
+using System.Data.SQLite;
+using System.IO;
 
 namespace TacticalEleven.Scripts
 {
     public class CreateManager : MonoBehaviour
     {
+        private TextField nombre, apellido, dia, mes, anio;
+        private DropdownField dpNacionalidad;
+        private Button btnSeguir, btnVolver;
+
+        private string dbPath;
+
         private void OnEnable()
         {
-            // Obtenemos el componente UIDocument asociado a este GameObject
             var uiDocument = GetComponent<UIDocument>();
             var root = uiDocument.rootVisualElement;
 
-            // Buscamos el DropdownField por su clase USS o su nombre UXML
-            var dropdown = root.Q<DropdownField>(className: "dpNacionalidad");
+            // Referencias a elementos
+            dpNacionalidad = root.Q<DropdownField>("dpNacionalidad");
+            nombre = root.Q<TextField>("txtNombre");
+            apellido = root.Q<TextField>("txtApellido");
+            dia = root.Q<TextField>("txtDia");
+            mes = root.Q<TextField>("txtMes");
+            anio = root.Q<TextField>("txtAnio");
+            btnSeguir = root.Q<Button>("btnSeguir");
+            btnVolver = root.Q<Button>("btnVolver");
 
-            if (dropdown == null)
+            // --- Dropdown ---
+            var nacionalidades = Constants.ObtenerTodasLasNacionalidades();
+            dpNacionalidad.choices = nacionalidades;
+            dpNacionalidad.value = nacionalidades.Contains("España") ? "España" : nacionalidades[0];
+
+            // --- Botones ---
+            btnSeguir.SetEnabled(false);
+            btnVolver.clicked += () => SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
+            btnSeguir.clicked += () =>
             {
-                Debug.LogWarning("No se encontró ningún Dropdown con la clase 'dpNacionalidad'.");
-                return;
-            }
+                GuardarManagerEnDB();
+                SceneLoader.Instance.LoadScene(Constants.TEAM_SELECTION_SCENE);
+            };
 
-            // Cargamos las nacionalidades
-            var nacionalidades = ObtenerTodasLasNacionalidades();
+            // --- Validaciones ---
+            nombre.RegisterValueChangedCallback(evt =>
+            {
+                nombre.value = Regex.Replace(evt.newValue, @"[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]", "");
+                ValidarCampos();
+            });
 
-            // Asignamos las opciones al Dropdown
-            dropdown.choices = nacionalidades;
+            apellido.RegisterValueChangedCallback(evt =>
+            {
+                apellido.value = Regex.Replace(evt.newValue, @"[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]", "");
+                ValidarCampos();
+            });
 
-            // (Opcional) Valor inicial vacío
-            dropdown.value = "";
+            dia.RegisterValueChangedCallback(evt =>
+            {
+                dia.value = Regex.Replace(evt.newValue, @"[^0-9]", "");
+                if (int.TryParse(dia.value, out int d))
+                {
+                    if (d < 1) dia.value = "1";
+                    else if (d > 31) dia.value = "31";
+                }
+                ValidarCampos();
+            });
+
+            mes.RegisterValueChangedCallback(evt =>
+            {
+                mes.value = Regex.Replace(evt.newValue, @"[^0-9]", "");
+                if (int.TryParse(mes.value, out int m))
+                {
+                    if (m < 1) mes.value = "1";
+                    else if (m > 12) mes.value = "12";
+
+                    AjustarDiaSegunMes(); // solo modifica el día si es necesario
+                }
+                ValidarCampos();
+            });
+
+            anio.RegisterValueChangedCallback(evt =>
+            {
+                anio.value = Regex.Replace(evt.newValue, @"[^0-9]", "");
+                if (anio.value.Length == 4)
+                {
+                    AjustarAnio();
+                }
+                ValidarCampos();
+            });
+
+            dpNacionalidad.RegisterValueChangedCallback(evt => ValidarCampos());
+
+            // Ruta a la base de datos
+            dbPath = Path.Combine(Application.streamingAssetsPath, Constants.DATABASE_NAME);
         }
 
-        private List<string> ObtenerTodasLasNacionalidades()
+        // --- Corrige el día si el mes no lo admite ---
+        private void AjustarDiaSegunMes()
         {
-            return new List<string>
+            if (!int.TryParse(dia.value, out int d)) return;
+            if (!int.TryParse(mes.value, out int m)) return;
+
+            int a = ParseIntSafe(anio.value);
+            if (a == 0) a = DateTime.Now.Year; // por si no hay año aún
+
+            int diasEnMes = DateTime.DaysInMonth(a, m);
+            if (d > diasEnMes)
             {
-                "España", "Albania", "Alemania", "Andorra", "Angola", "Antigua y Barbuda", "Arabia Saudita",
-                "Argelia", "Argentina", "Armenia", "Australia", "Austria", "Azerbaiyán", "Bahamas", "Bangladesh",
-                "Barbados", "Baréin", "Bélgica", "Belice", "Benín", "Bielorrusia", "Birmania", "Bolivia",
-                "Bosnia y Herzegovina", "Botsuana", "Brasil", "Brunéi", "Bulgaria", "Burkina Faso", "Burundi",
-                "Bután", "Cabo Verde", "Camboya", "Camerún", "Canadá", "Chad", "Chile", "China", "Chipre",
-                "Colombia", "Comoras", "Corea del Norte", "Corea del Sur", "Costa Rica", "Costa de Marfil", "Croacia",
-                "Cuba", "Curazao", "Dinamarca", "Dominica", "Ecuador", "Egipto", "El Salvador", "Emiratos Árabes Unidos",
-                "Eritrea", "Escocia", "Eslovaquia", "Eslovenia", "Estados Unidos", "Estonia", "Eswatini",
-                "Etiopía", "Fiji", "Filipinas", "Finlandia", "Francia", "Gabón", "Gales", "Gambia", "Georgia", "Ghana",
-                "Granada", "Grecia", "Guatemala", "Guinea", "Guinea-Bisáu", "Guyana", "Haití", "Honduras", "Hungría",
-                "India", "Indonesia", "Inglaterra", "Irak", "Irán", "Irlanda", "Islandia", "Islas Feroe",
-                "Islas Marshall", "Islas Salomón", "Israel", "Italia", "Jamaica", "Japón", "Jordania", "Kazajistán",
-                "Kenia", "Kirguistán", "Kiribati", "Kosovo", "Kuwait", "Laos", "Lesoto", "Letonia", "Líbano", "Liberia",
-                "Libia", "Liechtenstein", "Lituania", "Luxemburgo", "Macedonia del Norte", "Madagascar", "Malasia",
-                "Malawi", "Maldivas", "Mali", "Malta", "Moldavia", "Marruecos", "Martinica", "Mauricio", "Mauritania",
-                "México", "Micronesia", "Mónaco", "Mongolia", "Montenegro", "Mozambique", "Namibia", "Nauru", "Nepal",
-                "Nicaragua", "Níger", "Nigeria", "Noruega", "Nueva Zelanda", "Omán", "Países Bajos", "Pakistán",
-                "Palaos", "Panamá", "Papúa Nueva Guinea", "Paraguay", "Perú", "Polonia", "Portugal", "Reino Unido",
-                "República Checa", "República del Congo", "República Dominicana", "Ruanda", "Rumanía", "Rusia",
-                "Samoa", "San Cristóbal y Nieves", "San Marino", "Santo Tomé y Príncipe", "Senegal", "Serbia",
-                "Seychelles", "Sierra Leona", "Singapur", "Siria", "Somalia", "Sri Lanka", "Sudáfrica", "Sudán",
-                "Sudán del Sur", "Suecia", "Suiza", "Surinam", "Sáhara Occidental", "Tailandia", "Tayikistán",
-                "Tanzania", "Togo", "Tonga", "Trinidad y Tobago", "Túnez", "Turkmenistán", "Turquía", "Tuvalu",
-                "Ucrania", "Uganda", "Uruguay", "Uzbekistán", "Vanuatu", "Vaticano", "Venezuela", "Vietnam", "Yemen",
-                "Yibuti", "Zambia", "Zimbabue"
-            };
+                dia.value = diasEnMes.ToString();
+            }
+        }
+
+        // --- Ajusta el año cuando tiene 4 cifras ---
+        private void AjustarAnio()
+        {
+            if (!int.TryParse(anio.value, out int a)) return;
+
+            int anioActual = DateTime.Now.Year;
+            int anioMax = anioActual - 18;
+            int anioMin = 1950;
+
+            if (a < anioMin) a = anioMin;
+            if (a > anioMax) a = anioMax;
+
+            anio.value = a.ToString();
+        }
+
+        // --- Activa/desactiva el botón SEGUIR según la validez ---
+        private void ValidarCampos()
+        {
+            bool completos =
+                !string.IsNullOrEmpty(nombre.value) &&
+                !string.IsNullOrEmpty(apellido.value) &&
+                !string.IsNullOrEmpty(dia.value) &&
+                !string.IsNullOrEmpty(mes.value) &&
+                !string.IsNullOrEmpty(anio.value) &&
+                !string.IsNullOrEmpty(dpNacionalidad.value);
+
+            bool fechaValida = EsFechaValida();
+
+            btnSeguir.SetEnabled(completos && fechaValida);
+        }
+
+        // --- Comprueba si la fecha completa es válida ---
+        private bool EsFechaValida()
+        {
+            if (!int.TryParse(dia.value, out int d)) return false;
+            if (!int.TryParse(mes.value, out int m)) return false;
+            if (!int.TryParse(anio.value, out int a)) return false;
+
+            if (a < 1950 || a > DateTime.Now.Year - 18) return false;
+            if (m < 1 || m > 12) return false;
+
+            try
+            {
+                var fecha = new DateTime(a, m, d);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // --- Helper seguro ---
+        private int ParseIntSafe(string text)
+        {
+            return int.TryParse(text, out int v) ? v : 0;
+        }
+
+        // Método que guarda el manager en la base de datos
+        private void GuardarManagerEnDB()
+        {
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"❌ No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var connection = new SQLiteConnection(connString))
+                {
+                    connection.Open();
+
+                    string fechaNacimiento = $"{anio.value.PadLeft(4, '0')}-{mes.value.PadLeft(2, '0')}-{dia.value.PadLeft(2, '0')}";
+
+                    string query = @"INSERT INTO managers (nombre, apellido, nacionalidad, fechaNacimiento)
+                                     VALUES (@nombre, @apellido, @nacionalidad, @fechaNacimiento);";
+
+                    using (var cmd = new SQLiteCommand(query, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@nombre", nombre.value.Trim());
+                        cmd.Parameters.AddWithValue("@apellido", apellido.value.Trim());
+                        cmd.Parameters.AddWithValue("@nacionalidad", dpNacionalidad.value);
+                        cmd.Parameters.AddWithValue("@fechaNacimiento", fechaNacimiento);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    connection.Close();
+                }
+
+                Debug.Log($"Manager '{nombre.value} {apellido.value}' guardado correctamente en la base de datos.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
         }
     }
 }

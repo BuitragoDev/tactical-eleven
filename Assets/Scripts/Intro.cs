@@ -84,7 +84,7 @@ namespace TacticalEleven.Scripts
             yield return new WaitForSeconds(0.3f);
 
             // ✅ Simplemente usamos SceneLoader — él ya reproduce el sonido
-            SceneLoader.Instance.LoadScene(Constants.MAINMENU_SCENE);
+            SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
         }
     }
 }

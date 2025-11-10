@@ -13,7 +13,7 @@ namespace TacticalEleven.Scripts
 
             btnVolver.clicked += () =>
             {
-                SceneLoader.Instance.LoadScene(Constants.MAINMENU_SCENE);
+                SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
             };
         }
     }
