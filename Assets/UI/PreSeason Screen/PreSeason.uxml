@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/PreSeason%20Screen/PreSeason.uss?fileID=7433441132597879392&amp;guid=ad2d93d7b32d22a48bd6d34eb786ebe9&amp;type=3#PreSeason" />
+    <ui:VisualElement name="background-image" class="background-image">
+        
+    </ui:VisualElement>
+</ui:UXML>

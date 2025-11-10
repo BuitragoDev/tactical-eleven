@@ -41,6 +41,12 @@ namespace TacticalEleven.Scripts
             btnSeguir.clicked += () =>
             {
                 GuardarManagerEnDB();
+                string currency = PlayerPrefs.GetString("Currency", string.Empty);
+                if (currency == string.Empty)
+                {
+                    PlayerPrefs.SetString("Currency", Constants.EURO_NAME);
+                }
+
                 SceneLoader.Instance.LoadScene(Constants.TEAM_SELECTION_SCENE);
             };
 

@@ -8,6 +8,17 @@ namespace TacticalEleven.Scripts
         // -------------------------------- NOMBRE DE LA BASE DE DATOS ---------------------------------
         public const string DATABASE_NAME = "tacticalElevenDB.db";
 
+        // ----------------------------------- VALOR DE LA MONEDA --------------------------------------
+        public const string EURO_NAME = "EUR";
+        public const float EURO_VALUE = 1f;
+        public const string EURO_SYMBOL = "€";
+        public const string POUND_NAME = "GBP";
+        public const float POUND_VALUE = 0.87f;
+        public const string POUND_SYMBOL = "£";
+        public const string DOLLAR_NAME = "USD";
+        public const float DOLLAR_VALUE = 1.15f;
+        public const string DOLLAR_SYMBOL = "$";
+
         // ------------------------------- PARÁMETROS VOLUMEN AUDIOMIXER -------------------------------
         public const string MASTER_VOLUME_PARAMETER = "MasterVolumeParameter";
         public const string MUSIC_VOLUME_PARAMETER = "MusicVolumeParameter";
@@ -30,6 +41,7 @@ namespace TacticalEleven.Scripts
         public const string CREDITS_SCENE = "Credits";
         public const string CREATE_MANAGER_SCENE = "CreateManager";
         public const string TEAM_SELECTION_SCENE = "TeamSelection";
+        public const string PRE_SEASON_SCENE = "PreSeason";
 
         // -------------------------------------- NACIONALIDADES ---------------------------------------
         public static List<string> ObtenerTodasLasNacionalidades()

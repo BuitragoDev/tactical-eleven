@@ -17,6 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CreateManager.unity
     guid: 582db73ad0dbb68498f70fc61625e330
+  - enabled: 1
+    path: Assets/Scenes/TeamSelection.unity
+    guid: 4d03b39c8745de84791953fd4bd84365
+  - enabled: 1
+    path: Assets/Scenes/PreSeason.unity
+    guid: dd2037dc205dd944cace1cb488b4e4e0
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

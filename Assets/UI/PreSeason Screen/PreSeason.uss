@@ -1,0 +1,9 @@
+.background-image {
+    width: 1920px;
+    height: 1080px;
+    flex-grow: 1;
+    background-image: url("project://database/Assets/Resources/Backgrounds/mainBackground.png?fileID=21300000&guid=68bacede3fe51c34f9d14839f9e880fc&type=3#mainBackground");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
