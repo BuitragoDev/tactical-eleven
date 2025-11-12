@@ -42,6 +42,8 @@ namespace TacticalEleven.Scripts
         public const string CREATE_MANAGER_SCENE = "CreateManager";
         public const string TEAM_SELECTION_SCENE = "TeamSelection";
         public const string PRE_SEASON_SCENE = "PreSeason";
+        public const string TEAM_OBJECTIVES_SCENE = "TeamObjectives";
+        public const string MAIN_SCREEN_SCENE = "MainScreen";
 
         // -------------------------------------- NACIONALIDADES ---------------------------------------
         public static List<string> ObtenerTodasLasNacionalidades()
@@ -75,6 +77,36 @@ namespace TacticalEleven.Scripts
                 "Yibuti", "Zambia", "Zimbabue"
             };
         }
+
+        public static readonly Dictionary<string, string> PaisesPorColor = new Dictionary<string, string>
+        {
+            { "#6B1100", "TUR" },
+            { "#DECD31", "ESP" },
+            { "#1C4910", "POR" },
+            { "#008404", "ITA" },
+            { "#023FE6", "FRA" },
+            { "#F7BBBB", "ING" },
+            { "#0028BB", "ESC" },
+            { "#C3A720", "BEL" },
+            { "#DB5E0D", "HOL" },
+            { "#EF8F84", "SUI" },
+            { "#D92E2E", "AUT" },
+            { "#FFF100", "UCR" },
+            { "#4F7CD9", "GRE" },
+            { "#0097BD", "CRO" },
+            { "#C23E15", "MON" },
+            { "#9C2C2D", "NOR" },
+            { "#ADA210", "SUE" },
+            { "#00D4D9", "FIN" },
+            { "#D32C00", "DIN" },
+            { "#00445A", "CZE" },
+            { "#CB7805", "RUM" },
+            { "#EB0000", "POL" },
+            { "#00003C", "ISR" },
+            { "#8337CB", "HUN" },
+            { "#E6E5E6", "GEO" },
+            { "#8C101C", "ALE" },
+        };
     }
 }
 

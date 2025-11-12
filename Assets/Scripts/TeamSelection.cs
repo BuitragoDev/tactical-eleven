@@ -13,12 +13,11 @@ namespace TacticalEleven.Scripts
         [Header("Sound Clips")]
         [SerializeField] private AudioClip clickSFX;
 
+        // UI Elements
         private VisualElement areaEscudos, background, ventanaDetalles, escudo_equipo;
         private Button btnSeguir, btnVolver, btnDetalles, btnCerrar;
         private Label nombreEquipo, presidente, presupuesto, estadio, objetivo;
         private VisualElement division1Logo, division2Logo;
-
-        private string dbPath;
 
         private int equipoSeleccionadoId = -1;
 
@@ -33,6 +32,7 @@ namespace TacticalEleven.Scripts
             ventanaDetalles = root.Q<VisualElement>("ventanaDetalles");
             btnVolver = root.Q<Button>("btnVolver");
             btnSeguir = root.Q<Button>("btnSeguir");
+            btnSeguir.SetEnabled(false);
             btnDetalles = root.Q<Button>("btnDetalles");
             division1Logo = root.Q<VisualElement>("division1-logo");
             division2Logo = root.Q<VisualElement>("division2-logo");
@@ -50,6 +50,11 @@ namespace TacticalEleven.Scripts
 
             btnVolver.clicked += () =>
             {
+                if (PlayerPrefs.HasKey("MyTeam"))
+                {
+                    PlayerPrefs.DeleteKey("MyTeam");
+                }
+
                 SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
             };
 
@@ -61,13 +66,13 @@ namespace TacticalEleven.Scripts
                     PlayerPrefs.SetInt("MyTeam", equipoSeleccionadoId);
                 }
 
-                ActualizarManagerEnDB(equipoSeleccionadoId);
+                ManagerData.AgregarEquipoSeleccionado(equipoSeleccionadoId);
 
                 SceneLoader.Instance.LoadScene(Constants.PRE_SEASON_SCENE);
             };
 
             // Ruta de la base de datos
-            dbPath = Path.Combine(Application.streamingAssetsPath, Constants.DATABASE_NAME);
+            string dbPath = DatabaseManager.GetActiveDatabasePath();
 
             // Cargar por defecto los equipos de competición 1
             CargarEscudosPorCompeticion(1);
@@ -80,6 +85,9 @@ namespace TacticalEleven.Scripts
                 SetLogoSprite(division1Logo, "LogosCompeticiones/1off");
                 SetLogoSprite(division2Logo, "LogosCompeticiones/2");
 
+                division1Logo.SetEnabled(false);
+                division2Logo.SetEnabled(true);
+
                 CargarEscudosPorCompeticion(1);
             });
 
@@ -90,6 +98,9 @@ namespace TacticalEleven.Scripts
                 // Cambiar sprites de los logos
                 SetLogoSprite(division1Logo, "LogosCompeticiones/1");
                 SetLogoSprite(division2Logo, "LogosCompeticiones/2off");
+
+                division1Logo.SetEnabled(true);
+                division2Logo.SetEnabled(false);
 
                 CargarEscudosPorCompeticion(2);
             });
@@ -227,41 +238,11 @@ namespace TacticalEleven.Scripts
                 {
                     btnDetalles.text = "VER DETALLES";
                 }
+
+                btnSeguir.SetEnabled(true);
             });
 
             return imagen;
-        }
-
-        private void ActualizarManagerEnDB(int idEquipo)
-        {
-            try
-            {
-                if (!File.Exists(dbPath))
-                {
-                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
-                    return;
-                }
-
-                string connString = $"Data Source={dbPath};Version=3;";
-                using (var connection = new SQLiteConnection(connString))
-                {
-                    connection.Open();
-
-                    string query = @"UPDATE managers SET id_equipo = @IdEquipo WHERE id_manager = 1;";
-
-                    using (var cmd = new SQLiteCommand(query, connection))
-                    {
-                        cmd.Parameters.AddWithValue("@IdEquipo", idEquipo);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.Log($"Error al guardar en la base de datos: {ex.Message}");
-            }
         }
     }
 }

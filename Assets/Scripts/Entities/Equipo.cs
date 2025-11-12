@@ -8,6 +8,7 @@ namespace TacticalEleven.Scripts
         public string NombreCorto { get; set; }
         public string Presidente { get; set; }
         public int Presupuesto { get; set; }
+        public string Pais { get; set; }
         public string Ciudad { get; set; }
         public string Estadio { get; set; }
         public int Aforo { get; set; }
@@ -34,7 +35,7 @@ namespace TacticalEleven.Scripts
         public Equipo() { }
 
         // Constructor con parámetros
-        public Equipo(int idEquipo, string nombre, string nombreCorto, string presidente, int presupuesto, string ciudad,
+        public Equipo(int idEquipo, string nombre, string nombreCorto, string presidente, int presupuesto, string pais, string ciudad,
                       string estadio, int aforo, int reputacion, string objetivo, int rival, int idCompeticion, string rutaImagen,
                       string rutaImagen120, string rutaImagen80, string rutaImagen64, string rutaImagen32, string rutaEstadioInterior,
                       string rutaEstadioExterior, string rutaKitLocal, string rutaKitVisitante, int competicionEuropea)
@@ -44,6 +45,7 @@ namespace TacticalEleven.Scripts
             NombreCorto = nombreCorto;
             Presidente = presidente;
             Presupuesto = presupuesto;
+            Pais = pais;
             Ciudad = ciudad;
             Estadio = estadio;
             Aforo = aforo;

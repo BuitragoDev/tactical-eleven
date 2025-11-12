@@ -4,6 +4,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Data.SQLite;
 using System.IO;
+using Unity.Mathematics;
 
 namespace TacticalEleven.Scripts
 {
@@ -12,8 +13,6 @@ namespace TacticalEleven.Scripts
         private TextField nombre, apellido, dia, mes, anio;
         private DropdownField dpNacionalidad;
         private Button btnSeguir, btnVolver;
-
-        private string dbPath;
 
         private void OnEnable()
         {
@@ -30,6 +29,8 @@ namespace TacticalEleven.Scripts
             btnSeguir = root.Q<Button>("btnSeguir");
             btnVolver = root.Q<Button>("btnVolver");
 
+            nombre.Focus();
+
             // --- Dropdown ---
             var nacionalidades = Constants.ObtenerTodasLasNacionalidades();
             dpNacionalidad.choices = nacionalidades;
@@ -37,10 +38,17 @@ namespace TacticalEleven.Scripts
 
             // --- Botones ---
             btnSeguir.SetEnabled(false);
-            btnVolver.clicked += () => SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
+            btnVolver.clicked += () =>
+            {
+                DatabaseManager.DeleteTempDatabase();
+                SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
+            };
+
             btnSeguir.clicked += () =>
             {
-                GuardarManagerEnDB();
+                DatabaseManager.CreateTempDatabase();
+
+                GuardarManager(nombre.text.Trim(), apellido.text.Trim(), dpNacionalidad.value.Trim());
                 string currency = PlayerPrefs.GetString("Currency", string.Empty);
                 if (currency == string.Empty)
                 {
@@ -98,9 +106,6 @@ namespace TacticalEleven.Scripts
             });
 
             dpNacionalidad.RegisterValueChangedCallback(evt => ValidarCampos());
-
-            // Ruta a la base de datos
-            dbPath = Path.Combine(Application.streamingAssetsPath, Constants.DATABASE_NAME);
         }
 
         // --- Corrige el día si el mes no lo admite ---
@@ -178,44 +183,11 @@ namespace TacticalEleven.Scripts
         }
 
         // Método que guarda el manager en la base de datos
-        private void GuardarManagerEnDB()
+        private void GuardarManager(string nombre, string apellido, string nacionalidad)
         {
-            try
-            {
-                if (!File.Exists(dbPath))
-                {
-                    Debug.LogError($"❌ No se encontró la base de datos en {dbPath}");
-                    return;
-                }
+            string fechaNacimiento = $"{anio.value.PadLeft(4, '0')}-{mes.value.PadLeft(2, '0')}-{dia.value.PadLeft(2, '0')}";
 
-                string connString = $"Data Source={dbPath};Version=3;";
-                using (var connection = new SQLiteConnection(connString))
-                {
-                    connection.Open();
-
-                    string fechaNacimiento = $"{anio.value.PadLeft(4, '0')}-{mes.value.PadLeft(2, '0')}-{dia.value.PadLeft(2, '0')}";
-
-                    string query = @"INSERT INTO managers (nombre, apellido, nacionalidad, fechaNacimiento)
-                                     VALUES (@nombre, @apellido, @nacionalidad, @fechaNacimiento);";
-
-                    using (var cmd = new SQLiteCommand(query, connection))
-                    {
-                        cmd.Parameters.AddWithValue("@nombre", nombre.value.Trim());
-                        cmd.Parameters.AddWithValue("@apellido", apellido.value.Trim());
-                        cmd.Parameters.AddWithValue("@nacionalidad", dpNacionalidad.value);
-                        cmd.Parameters.AddWithValue("@fechaNacimiento", fechaNacimiento);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    connection.Close();
-                }
-
-                Debug.Log($"Manager '{nombre.value} {apellido.value}' guardado correctamente en la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
-            }
+            ManagerData.GuardarManagerEnDB(nombre, apellido, nacionalidad, fechaNacimiento);
         }
     }
 }
