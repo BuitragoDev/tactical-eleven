@@ -29,6 +29,7 @@ namespace TacticalEleven.Scripts
         public const string CAREER_MODE_BUTTON = "career-mode";
         public const string SETTINGS_BUTTON = "settings";
         public const string EDITOR_BUTTON = "editor";
+        public const string CARGAR_BUTTON = "cargar-partida";
         public const string CREDITS_BUTTON = "credits-icon";
         public const string EXIT_BUTTON = "exit-icon";
         public const string WEB_BUTTON = "web-icon";
@@ -44,6 +45,7 @@ namespace TacticalEleven.Scripts
         public const string PRE_SEASON_SCENE = "PreSeason";
         public const string TEAM_OBJECTIVES_SCENE = "TeamObjectives";
         public const string MAIN_SCREEN_SCENE = "MainScreen";
+        public const string LOAD_SCREEN_SCENE = "CargarPartida";
 
         // -------------------------------------- NACIONALIDADES ---------------------------------------
         public static List<string> ObtenerTodasLasNacionalidades()

@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/UI/PortadaScreen/Portada.uss?fileID=7433441132597879392&amp;guid=62788ef85678fff428448e120db805d3&amp;type=3#Portada" />
+    <ui:VisualElement name="root" class="root">
+        <ui:VisualElement name="top" class="top" style="flex-grow: 1;">
+            <ui:VisualElement name="lastGame-container" class="lastGame-container" style="flex-grow: 1;" />
+            <ui:VisualElement name="nextGame-container" class="nextGame-container" style="flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="bottom" class="bottom" style="flex-grow: 1;">
+            <ui:VisualElement name="clasificacion-container" class="clasificacion-container" style="flex-grow: 1;" />
+            <ui:VisualElement name="estadisticasJugador-container" class="estadisticasJugador-container" style="flex-grow: 1;" />
+            <ui:VisualElement name="resumen-container" class="resumen-container" style="flex-grow: 1;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

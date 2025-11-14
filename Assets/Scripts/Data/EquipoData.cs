@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
@@ -111,12 +112,12 @@ namespace TacticalEleven.Scripts
         {
             var dbPath = GetDBPath();
 
-            List<Equipo> lista = new List<Equipo>();
+            List<Equipo> equipos = new List<Equipo>();
 
             if (!File.Exists(dbPath))
             {
                 Debug.LogError($"No se encontró la base de datos en {dbPath}");
-                return lista;
+                return equipos;
             }
 
             using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
@@ -124,25 +125,68 @@ namespace TacticalEleven.Scripts
                 conexion.Open();
                 using (var comando = conexion.CreateCommand())
                 {
-                    comando.CommandText = "SELECT id_equipo, nombre, nombre_corto FROM equipos WHERE id_competicion=@idComp";
-                    comando.Parameters.AddWithValue("@idComp", idCompeticion);
+                    comando.CommandText = @"SELECT 
+                                                e.id_equipo,
+                                                e.nombre,
+                                                e.nombre_corto,
+                                                e.presidente,
+                                                e.ciudad,
+                                                e.estadio,
+                                                e.objetivo,
+                                                e.aforo,
+                                                e.reputacion,
+                                                e.rival,
+                                                e.competicion_europea,
+                                                t.nombre || ' ' || t.apellido AS entrenador,
+                                                t.reputacion AS reputacion_entrenador,
+                                                e.ruta_imagen, e.ruta_imagen120, e.ruta_imagen80, e.ruta_imagen64, e.ruta_imagen32, 
+                                                e.ruta_estadio_interior, e.ruta_estadio_exterior, 
+                                                e.ruta_kit_local, e.ruta_kit_visitante
+                                            FROM
+                                                equipos e
+                                            LEFT JOIN
+                                                entrenadores t
+                                            ON
+                                                e.id_equipo = t.id_equipo
+                                            WHERE
+                                                e.id_competicion = @IdCompeticion";
+                    comando.Parameters.AddWithValue("@IdCompeticion", idCompeticion);
 
                     using (var reader = comando.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            lista.Add(new Equipo
+                            equipos.Add(new Equipo
                             {
-                                IdEquipo = reader.GetInt32(0),
-                                Nombre = reader.GetString(1),
-                                NombreCorto = reader.GetString(2)
+                                IdEquipo = reader["id_equipo"] != DBNull.Value ? Convert.ToInt32(reader["id_equipo"]) : 0,
+                                Nombre = reader["nombre"]?.ToString() ?? string.Empty,
+                                NombreCorto = reader["nombre_corto"]?.ToString() ?? string.Empty,
+                                Presidente = reader["presidente"]?.ToString() ?? string.Empty,
+                                Ciudad = reader["ciudad"]?.ToString() ?? string.Empty,
+                                Estadio = reader["estadio"]?.ToString() ?? string.Empty,
+                                Aforo = int.TryParse(reader["aforo"]?.ToString(), out int capacidad) ? capacidad : 0,
+                                Reputacion = int.TryParse(reader["reputacion"]?.ToString(), out int reputacion) ? reputacion : 0,
+                                Objetivo = reader["objetivo"]?.ToString() ?? string.Empty,
+                                Rival = int.TryParse(reader["rival"]?.ToString(), out int rival) ? rival : 0,
+                                CompeticionEuropea = int.TryParse(reader["competicion_europea"]?.ToString(), out int competicionEuropea) ? competicionEuropea : 0,
+                                Entrenador = reader["entrenador"] as string ?? "Sin asignar",
+                                ReputacionEntrenador = reader["reputacion_entrenador"] != DBNull.Value ? Convert.ToInt32(reader["reputacion_entrenador"]) : 0,
+                                RutaImagen = reader["ruta_imagen"]?.ToString() ?? string.Empty,
+                                RutaImagen120 = reader["ruta_imagen120"]?.ToString() ?? string.Empty,
+                                RutaImagen80 = reader["ruta_imagen80"]?.ToString() ?? string.Empty,
+                                RutaImagen64 = reader["ruta_imagen64"]?.ToString() ?? string.Empty,
+                                RutaImagen32 = reader["ruta_imagen32"]?.ToString() ?? string.Empty,
+                                RutaEstadioInterior = reader["ruta_estadio_interior"]?.ToString() ?? string.Empty,
+                                RutaEstadioExterior = reader["ruta_estadio_exterior"]?.ToString() ?? string.Empty,
+                                RutaKitLocal = reader["ruta_kit_local"]?.ToString() ?? string.Empty,
+                                RutaKitVisitante = reader["ruta_kit_visitante"]?.ToString() ?? string.Empty
                             });
                         }
                     }
                 }
             }
 
-            return lista;
+            return equipos;
         }
 
         // ------------------------------------------------------------- MÉTODO QUE DEVUELVE LOS DETALLES DE LOS EQUIPOS DE UN PAÍS
@@ -169,8 +213,7 @@ namespace TacticalEleven.Scripts
                                                 ruta_imagen32, ruta_estadio_interior, ruta_estadio_exterior,
                                                 ruta_kit_local, ruta_kit_visitante
                                             FROM equipos
-                                            WHERE pais = @Pais
-                                            ";
+                                            WHERE pais = @Pais";
 
                     comando.Parameters.AddWithValue("@Pais", pais);
 
@@ -240,7 +283,7 @@ namespace TacticalEleven.Scripts
                                             FROM equipos e
                                             LEFT JOIN entrenadores en ON e.id_equipo = en.id_equipo
                                             WHERE e.id_competicion = @idCompeticion
-                                            ORDER BY e.reputacion DESC;";
+                                            ORDER BY e.reputacion DESC";
 
                     comando.Parameters.AddWithValue("@idCompeticion", idCompeticion);
 
@@ -255,6 +298,130 @@ namespace TacticalEleven.Scripts
                                 Objetivo = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                 Entrenador = reader.IsDBNull(3) ? "—" : $"{reader.GetString(3)} {reader.GetString(4)}",
                                 ReputacionEntrenador = reader.IsDBNull(5) ? 0 : reader.GetInt32(5)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return equipos;
+        }
+
+        // ---------------------------------------------------------- MÉTODO QUE DEVUELVE UNA LISTA DE EQUIPOS QUE JUEGAN EN EUROPA 1
+        public static List<Equipo> EquiposJueganEuropa1(int competicion)
+        {
+            var dbPath = GetDBPath();
+
+            List<Equipo> equipos = new List<Equipo>();
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+                using (var comando = conexion.CreateCommand())
+                {
+                    comando.CommandText = @"SELECT e.*, en.nombre AS nombre_entrenador, en.reputacion AS reputacion_entrenador
+                                            FROM equipos e
+                                            LEFT JOIN entrenadores en ON e.id_equipo = en.id_equipo
+                                            WHERE e.id_competicion = @idCompeticion AND e.competicion_europea = 5";
+
+                    comando.Parameters.AddWithValue("@idCompeticion", competicion);
+
+                    using (var reader = comando.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            equipos.Add(new Equipo()
+                            {
+                                IdEquipo = reader["id_equipo"] != DBNull.Value ? Convert.ToInt32(reader["id_equipo"]) : 0,
+                                Nombre = reader["nombre"]?.ToString() ?? string.Empty,
+                                NombreCorto = reader["nombre_corto"]?.ToString() ?? string.Empty,
+                                Presidente = reader["presidente"]?.ToString() ?? string.Empty,
+                                Ciudad = reader["ciudad"]?.ToString() ?? string.Empty,
+                                Estadio = reader["estadio"]?.ToString() ?? string.Empty,
+                                Aforo = int.TryParse(reader["aforo"]?.ToString(), out int capacidad) ? capacidad : 0,
+                                Reputacion = int.TryParse(reader["reputacion"]?.ToString(), out int reputacion) ? reputacion : 0,
+                                Objetivo = reader["objetivo"]?.ToString() ?? string.Empty,
+                                Rival = int.TryParse(reader["rival"]?.ToString(), out int rival) ? rival : 0,
+                                CompeticionEuropea = int.TryParse(reader["competicion_europea"]?.ToString(), out int competicionEuropea) ? competicionEuropea : 0,
+                                Entrenador = reader["nombre_entrenador"] as string ?? "Sin asignar",
+                                ReputacionEntrenador = reader["reputacion_entrenador"] != DBNull.Value ? Convert.ToInt32(reader["reputacion_entrenador"]) : 0,
+                                RutaImagen = reader["ruta_imagen"]?.ToString() ?? string.Empty,
+                                RutaImagen120 = reader["ruta_imagen120"]?.ToString() ?? string.Empty,
+                                RutaImagen80 = reader["ruta_imagen80"]?.ToString() ?? string.Empty,
+                                RutaImagen64 = reader["ruta_imagen64"]?.ToString() ?? string.Empty,
+                                RutaImagen32 = reader["ruta_imagen32"]?.ToString() ?? string.Empty,
+                                RutaEstadioInterior = reader["ruta_estadio_interior"]?.ToString() ?? string.Empty,
+                                RutaEstadioExterior = reader["ruta_estadio_exterior"]?.ToString() ?? string.Empty,
+                                RutaKitLocal = reader["ruta_kit_local"]?.ToString() ?? string.Empty,
+                                RutaKitVisitante = reader["ruta_kit_visitante"]?.ToString() ?? string.Empty
+                            });
+                        }
+                    }
+                }
+            }
+
+            return equipos;
+        }
+
+        // ---------------------------------------------------------- MÉTODO QUE DEVUELVE UNA LISTA DE EQUIPOS QUE JUEGAN EN EUROPA 2
+        public static List<Equipo> EquiposJueganEuropa2(int competicion)
+        {
+            var dbPath = GetDBPath();
+
+            List<Equipo> equipos = new List<Equipo>();
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+                using (var comando = conexion.CreateCommand())
+                {
+                    comando.CommandText = @"SELECT e.*, en.nombre AS nombre_entrenador, en.reputacion AS reputacion_entrenador
+                                            FROM equipos e
+                                            LEFT JOIN entrenadores en ON e.id_equipo = en.id_equipo
+                                            WHERE e.id_competicion = @idCompeticion AND e.competicion_europea = 6";
+
+                    comando.Parameters.AddWithValue("@idCompeticion", competicion);
+
+                    using (var reader = comando.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            equipos.Add(new Equipo()
+                            {
+                                IdEquipo = reader["id_equipo"] != DBNull.Value ? Convert.ToInt32(reader["id_equipo"]) : 0,
+                                Nombre = reader["nombre"]?.ToString() ?? string.Empty,
+                                NombreCorto = reader["nombre_corto"]?.ToString() ?? string.Empty,
+                                Presidente = reader["presidente"]?.ToString() ?? string.Empty,
+                                Ciudad = reader["ciudad"]?.ToString() ?? string.Empty,
+                                Estadio = reader["estadio"]?.ToString() ?? string.Empty,
+                                Aforo = int.TryParse(reader["aforo"]?.ToString(), out int capacidad) ? capacidad : 0,
+                                Reputacion = int.TryParse(reader["reputacion"]?.ToString(), out int reputacion) ? reputacion : 0,
+                                Objetivo = reader["objetivo"]?.ToString() ?? string.Empty,
+                                Rival = int.TryParse(reader["rival"]?.ToString(), out int rival) ? rival : 0,
+                                CompeticionEuropea = int.TryParse(reader["competicion_europea"]?.ToString(), out int competicionEuropea) ? competicionEuropea : 0,
+                                Entrenador = reader["nombre_entrenador"] as string ?? "Sin asignar",
+                                ReputacionEntrenador = reader["reputacion_entrenador"] != DBNull.Value ? Convert.ToInt32(reader["reputacion_entrenador"]) : 0,
+                                RutaImagen = reader["ruta_imagen"]?.ToString() ?? string.Empty,
+                                RutaImagen120 = reader["ruta_imagen120"]?.ToString() ?? string.Empty,
+                                RutaImagen80 = reader["ruta_imagen80"]?.ToString() ?? string.Empty,
+                                RutaImagen64 = reader["ruta_imagen64"]?.ToString() ?? string.Empty,
+                                RutaImagen32 = reader["ruta_imagen32"]?.ToString() ?? string.Empty,
+                                RutaEstadioInterior = reader["ruta_estadio_interior"]?.ToString() ?? string.Empty,
+                                RutaEstadioExterior = reader["ruta_estadio_exterior"]?.ToString() ?? string.Empty,
+                                RutaKitLocal = reader["ruta_kit_local"]?.ToString() ?? string.Empty,
+                                RutaKitVisitante = reader["ruta_kit_visitante"]?.ToString() ?? string.Empty
                             });
                         }
                     }

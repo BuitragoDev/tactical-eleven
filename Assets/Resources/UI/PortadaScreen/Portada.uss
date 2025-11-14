@@ -1,0 +1,82 @@
+.root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.top {
+    display: flex;
+    flex-direction: row;
+    height: 30%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 0px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.bottom {
+    display: flex;
+    flex-direction: row;
+    height: 70%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.lastGame-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    background-color: rgb(229, 229, 229);
+}
+
+.nextGame-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    background-color: rgb(229, 229, 229);
+}
+
+.clasificacion-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(229, 229, 229);
+    margin-right: 10px;
+}
+
+.estadisticasJugador-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(229, 229, 229);
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.resumen-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(229, 229, 229);
+    margin-left: 10px;
+}

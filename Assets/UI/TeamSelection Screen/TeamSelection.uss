@@ -277,3 +277,11 @@
 .close-button:active {
     background-color: rgb(17, 17, 17);
 }
+
+.escudo {
+    background-size: cover;
+}
+
+.escudo-seleccionado {
+    background-color: rgba(117, 158, 131, 1);
+}

@@ -18,6 +18,7 @@ namespace TacticalEleven.Scripts
         private Button btnSeguir, btnVolver, btnDetalles, btnCerrar;
         private Label nombreEquipo, presidente, presupuesto, estadio, objetivo;
         private VisualElement division1Logo, division2Logo;
+        private VisualElement escudoSeleccionado = null;
 
         private int equipoSeleccionadoId = -1;
 
@@ -221,6 +222,14 @@ namespace TacticalEleven.Scripts
             imagen.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);    // Reproducir sonido de click
+
+                // --- RESALTAR ESCUDO ---
+                if (escudoSeleccionado != null)
+                    escudoSeleccionado.RemoveFromClassList("escudo-seleccionado"); // desmarcar anterior
+
+                imagen.AddToClassList("escudo-seleccionado"); // marcar el nuevo
+                escudoSeleccionado = imagen;
+
                 PlayerPrefs.SetInt("miEquipo", idEquipo);   // Guardar el equipo seleccionado en un PlayerPref
 
                 // Guardar el id del equipo seleccionado

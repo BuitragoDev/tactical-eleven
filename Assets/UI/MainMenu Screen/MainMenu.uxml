@@ -6,7 +6,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="center-area" class="center-area">
             <ui:VisualElement name="center-left-area" class="center-left-area" />
-            <ui:VisualElement name="center-right-area" class="center-right-area">
+            <ui:VisualElement name="center-right-area" class="center-right-area" style="height: 627px; justify-content: center;">
                 <ui:VisualElement name="manager-mode" class="manager-mode">
                     <ui:Label text="Modo Manager" name="lblManagerMode" class="menu-labels" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Bold&apos;);" />
                     <ui:VisualElement name="iconManagerMode" class="manager-mode-icon" style="flex-shrink: 0;" />
@@ -22,6 +22,10 @@
                 <ui:VisualElement name="editor" class="editor-mode">
                     <ui:Label text="Editor del Juego" name="lblEditor" class="menu-labels" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Bold&apos;);" />
                     <ui:VisualElement name="iconEditor" class="editor-icon" style="flex-shrink: 0;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="cargar-partida" class="cargar-mode">
+                    <ui:Label text="Cargar Partida" name="lblCargarPartida" class="menu-labels" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Bold&apos;);" />
+                    <ui:VisualElement name="iconCargarPartida" class="cargar-icon" style="flex-shrink: 0;" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

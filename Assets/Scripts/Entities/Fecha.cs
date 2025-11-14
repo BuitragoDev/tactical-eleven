@@ -1,3 +1,5 @@
+#nullable enable
+
 public class Fecha
 {
     // Propiedades que corresponden a los campos de la tabla SQL

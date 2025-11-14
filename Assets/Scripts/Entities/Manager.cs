@@ -1,13 +1,15 @@
+#nullable enable
+
 namespace TacticalEleven.Scripts
 {
     public class Manager
     {
         // Atributos
         public int IdManager { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public string Nacionalidad { get; set; }
-        public string FechaNacimiento { get; set; }
+        public string Nombre { get; set; } = null!;
+        public string Apellido { get; set; } = null!;
+        public string Nacionalidad { get; set; } = null!;
+        public string FechaNacimiento { get; set; } = null!;
         public int? IdEquipo { get; set; } // Puede ser null
         public int CDirectiva { get; set; }
         public int CFans { get; set; }
@@ -18,11 +20,11 @@ namespace TacticalEleven.Scripts
         public int PartidosEmpatados { get; set; }
         public int PartidosPerdidos { get; set; }
         public int Puntos { get; set; }
-        public string Tactica { get; set; }
+        public string Tactica { get; set; } = null!;
         public int Despedido { get; set; }
         public int PrimeraTemporada { get; set; }
 
-        public string RutaImagen { get; set; }
+        public string RutaImagen { get; set; } = null!;
 
         // Constructor por defecto
         public Manager() { }

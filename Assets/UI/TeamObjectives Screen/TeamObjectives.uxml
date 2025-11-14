@@ -25,6 +25,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="bottom-area" class="bottom-area">
+            <ui:ProgressBar value="22" title="Generando..." name="loading" class="progress-bar" />
             <ui:Button text="SEGUIR" name="btnSeguir" class="back-button" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;);" />
         </ui:VisualElement>
     </ui:VisualElement>

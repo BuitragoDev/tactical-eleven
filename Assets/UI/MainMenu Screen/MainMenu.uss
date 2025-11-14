@@ -41,7 +41,8 @@ VisualElement {
 .center-left-area {
     display: flex;
     flex-grow: 1;
-    width: 65%;
+    width: 73%;
+    height: 100%;
     justify-content: center;
     align-items: center;
 }
@@ -49,7 +50,7 @@ VisualElement {
 .center-right-area {
     display: flex;
     flex-grow: 1;
-    width: 35%;
+    width: 30%;
     justify-content: center;
     align-items: center;
     margin-right: 20px;
@@ -68,13 +69,9 @@ VisualElement {
     border-top-right-radius: 25px; 
     border-bottom-right-radius: 25px; 
     border-bottom-left-radius: 25px; 
-    padding-top: 20px; 
-    padding-right: 20px; 
-    padding-bottom: 20px; 
-    padding-left: 20px; 
-    margin-right: 50px;
-    margin-top: 25px; 
-    margin-bottom: 25px;
+    margin-top: 10px; 
+    margin-right: 50px; 
+    margin-bottom: 10px; 
 }
 
 .menu-labels {
@@ -83,14 +80,14 @@ VisualElement {
     flex-grow: 1;
     justify-content: center;
     align-items: flex-end;
-    font-size: 48px;
+    font-size: 36px;
     -unity-text-align: middle-right;
-    margin-right: 80px;
+    padding-right: 80px;
 }
 
 .manager-mode-icon {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
     background-image: url("project://database/Assets/Resources/Icons/manager-icon.png");
     background-size: contain;
     background-position: center;
@@ -111,18 +108,14 @@ VisualElement {
     border-top-right-radius: 25px; 
     border-bottom-right-radius: 25px; 
     border-bottom-left-radius: 25px; 
-    padding-top: 20px; 
-    padding-right: 20px; 
-    padding-bottom: 20px; 
-    padding-left: 20px; 
-    margin-right: 50px;
-    margin-top: 25px; 
-    margin-bottom: 25px;
+    margin-top: 10px; 
+    margin-right: 50px; 
+    margin-bottom: 10px; 
 }
 
 .career-mode-icon {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
     background-image: url("project://database/Assets/Resources/Icons/career-icon.png");
     background-size: contain;
     background-position: center;
@@ -143,18 +136,14 @@ VisualElement {
     border-top-right-radius: 25px; 
     border-bottom-right-radius: 25px; 
     border-bottom-left-radius: 25px; 
-    padding-top: 20px; 
-    padding-right: 20px; 
-    padding-bottom: 20px; 
-    padding-left: 20px; 
-    margin-right: 50px;
-    margin-top: 25px; 
-    margin-bottom: 25px;
+    margin-top: 10px; 
+    margin-right: 50px; 
+    margin-bottom: 10px; 
 }
 
 .settings-icon {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
     background-image: url("project://database/Assets/Resources/Icons/settings-icon.png");
     background-size: contain;
     background-position: center;
@@ -175,19 +164,43 @@ VisualElement {
     border-top-right-radius: 25px; 
     border-bottom-right-radius: 25px; 
     border-bottom-left-radius: 25px; 
-    padding-top: 20px; 
-    padding-right: 20px; 
-    padding-bottom: 20px; 
-    padding-left: 20px; 
-    margin-right: 50px;
-    margin-top: 25px; 
-    margin-bottom: 25px;
+    margin-top: 10px; 
+    margin-right: 50px; 
+    margin-bottom: 10px; 
 }
 
 .editor-icon {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
     background-image: url("project://database/Assets/Resources/Icons/editor-icon.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-right: 50px;
+}
+
+.cargar-mode {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgb(221, 221, 221); 
+    border-top-left-radius: 25px; 
+    border-top-right-radius: 25px; 
+    border-bottom-right-radius: 25px; 
+    border-bottom-left-radius: 25px; 
+    margin-top: 10px; 
+    margin-right: 50px; 
+    margin-bottom: 10px; 
+}
+
+.cargar-icon {
+    width: 64px;
+    height: 64px;
+    background-image: url("project://database/Assets/Resources/Icons/cargarPartida-icon.png");
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;

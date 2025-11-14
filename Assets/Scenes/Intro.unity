@@ -119,6 +119,56 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &124705516
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 124705518}
+  - component: {fileID: 124705517}
+  m_Layer: 0
+  m_Name: CursorManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &124705517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 124705516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d9ec30fcaa16894ab37628a70ac59d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cursorTexture: {fileID: 2800000, guid: 6183ddf64f2eae34f82dc59e63bb6a52, type: 3}
+  hotSpot: {x: 0, y: 0}
+  cursorBusy: {fileID: 2800000, guid: df560e78ef7139c448d9b1e9a1ba501e, type: 3}
+  cursorHand: {fileID: 2800000, guid: 0513b872882b44148bc00ebe4ab0aebb, type: 3}
+  cursorError: {fileID: 2800000, guid: 8f630c9ba254c9c4ca42f0b41f938c0b, type: 3}
+  cursorMode: 0
+--- !u!4 &124705518
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 124705516}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.20091653, y: 0.9956769, z: -9.948529}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &135460732
 GameObject:
   m_ObjectHideFlags: 0
@@ -843,3 +893,4 @@ SceneRoots:
   - {fileID: 315699185}
   - {fileID: 135460735}
   - {fileID: 1878839025}
+  - {fileID: 124705518}

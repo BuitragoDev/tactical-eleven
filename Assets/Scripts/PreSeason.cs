@@ -228,24 +228,6 @@ namespace TacticalEleven.Scripts
                     }
                 }
 
-                // Guardar la partida (copia de tempGame.db)
-                string newSavePath = DatabaseManager.SaveCurrentGame();
-
-                if (!string.IsNullOrEmpty(newSavePath))
-                {
-                    // Borrar base temporal
-                    DatabaseManager.DeleteTempDatabase();
-
-                    // Actualizar base activa al nuevo guardado
-                    DatabaseManager.SetActiveDatabase(newSavePath);
-
-                    Debug.Log($"Nueva base de datos activa: {newSavePath}");
-                }
-                else
-                {
-                    Debug.LogError("No se pudo guardar la partida correctamente.");
-                }
-
                 // Cargar siguiente escena
                 SceneLoader.Instance.LoadScene(Constants.TEAM_OBJECTIVES_SCENE);
             };

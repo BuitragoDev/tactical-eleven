@@ -1,0 +1,77 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/MainScreen/MainScreen.uss?fileID=7433441132597879392&amp;guid=aa224e0d95405cd49b10b39927619caa&amp;type=3#MainScreen" />
+    <ui:VisualElement name="background-image" class="background-image">
+        <ui:VisualElement name="top-area" class="top-area">
+            <ui:VisualElement name="cabecera-escudo-area" class="cabecera-escudo-area" style="flex-grow: 1;">
+                <ui:VisualElement name="cabecera-escudo" class="cabecera-escudo" />
+            </ui:VisualElement>
+            <ui:VisualElement name="cabecera-equipo-area" class="cabecera-equipo-area" style="flex-grow: 1;">
+                <ui:VisualElement name="cabecera-equipo-nombre" class="cabecera-equipo-nombre" style="flex-grow: 1;">
+                    <ui:Label name="miEquipoNombre" class="miEquipoNombre" />
+                </ui:VisualElement>
+                <ui:VisualElement name="cabecera-presupuesto" class="cabecera-presupuesto" style="flex-grow: 1;">
+                    <ui:Label name="miPresupuesto" class="miPresupuesto" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="cabecera-manager-area" class="cabecera-manager-area" style="flex-grow: 1;">
+                <ui:VisualElement name="cabecera-manager-nombre" class="cabecera-manager-nombre" style="flex-grow: 1;">
+                    <ui:Label name="managerNombre" class="managerNombre" />
+                </ui:VisualElement>
+                <ui:VisualElement name="cabecera-manager-valoracion" class="cabecera-manager-valoracion" style="flex-grow: 1;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="cabecera-fecha-area" class="cabecera-fecha-area" style="flex-grow: 1;">
+                <ui:VisualElement name="fecha1-area" class="fecha1-area" style="flex-grow: 1;">
+                    <ui:Label name="fecha1" class="fecha1" />
+                </ui:VisualElement>
+                <ui:VisualElement name="fecha2-area" class="fecha2-area" style="flex-grow: 1;">
+                    <ui:Label name="fecha2" class="fecha2" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="cabecera-boton-area" class="cabecera-boton-area" style="flex-grow: 1;">
+                <ui:Button name="btnSeguir" text="CONTINUAR" icon-image="project://database/Assets/Resources/Icons/avanzar.png?fileID=2800000&amp;guid=a6028fb24b29fe443bb23067d1943788&amp;type=3#avanzar" class="btnSeguir" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="center-area" class="center-area">
+            <ui:VisualElement name="center-left" class="center-left" style="flex-grow: 1;">
+                <ui:VisualElement name="home" class="home" style="flex-grow: 0; height: 5%;">
+                    <ui:VisualElement name="home-icon" class="home-icon" style="flex-grow: 1;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="club" class="club" style="flex-grow: 1;">
+                    <ui:VisualElement name="club-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/club_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="alineacion" style="flex-grow: 1;">
+                    <ui:VisualElement name="alineacion-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/entrenador_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="competiciones" style="flex-grow: 1;">
+                    <ui:VisualElement name="competiciones-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/competiciones_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="calendario" style="flex-grow: 1;">
+                    <ui:VisualElement name="calendario-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/calendario_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="fichajes" style="flex-grow: 1;">
+                    <ui:VisualElement name="fichajes-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/transferencias_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="finanzas" style="flex-grow: 1;">
+                    <ui:VisualElement name="finanzas-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/finanzas_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="estadio" style="flex-grow: 1;">
+                    <ui:VisualElement name="estadio-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/estadioBlanco_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="manager" style="flex-grow: 1;">
+                    <ui:VisualElement name="manager-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/manager_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="mensajes" style="flex-grow: 1;">
+                    <ui:VisualElement name="mensajes-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/correo_icon&apos;);" />
+                </ui:VisualElement>
+                <ui:VisualElement name="ajustes" style="flex-grow: 1;">
+                    <ui:VisualElement name="ajustes-icon" class="bar-menu-icons" style="flex-grow: 1; background-image: resource(&apos;Icons/ajustes-blanco-icon&apos;);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="center-right" class="center-right" style="flex-grow: 1;">
+                <ui:VisualElement name="top-menu" class="top-menu" style="flex-grow: 1;" />
+                <ui:VisualElement name="main-container" class="main-container" style="flex-grow: 1;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="bottom-area" class="bottom-area" />
+    </ui:VisualElement>
+</ui:UXML>

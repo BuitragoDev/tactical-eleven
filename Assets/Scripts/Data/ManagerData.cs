@@ -60,6 +60,72 @@ namespace TacticalEleven.Scripts
             }
         }
 
+        // ------------------------------------------------------------------------- MÉTODO QUE MUESTRA LOS DATOS DEL MÁNAGER
+        public static Manager MostrarManager()
+        {
+            Manager coach = null; // Inicializamos la variable como null
+
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return null;
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var connection = new SQLiteConnection(connString))
+                {
+                    connection.Open();
+
+                    string query = @"SELECT * FROM managers WHERE id_manager = 1;";
+
+                    using (var cmd = new SQLiteCommand(query, connection))
+                    {
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read()) // Si se encuentra un registro
+                            {
+                                coach = new Manager
+                                {
+                                    IdManager = reader.GetInt32(reader.GetOrdinal("id_manager")),
+                                    Nombre = reader.GetString(reader.GetOrdinal("nombre")),
+                                    Apellido = reader.GetString(reader.GetOrdinal("apellido")),
+                                    Nacionalidad = reader.GetString(reader.GetOrdinal("nacionalidad")),
+                                    FechaNacimiento = reader.GetString(reader.GetOrdinal("fechaNacimiento")),
+                                    IdEquipo = reader.IsDBNull(reader.GetOrdinal("id_equipo")) ? 0 : reader.GetInt32(reader.GetOrdinal("id_equipo")),
+                                    CDirectiva = reader.IsDBNull(reader.GetOrdinal("cDirectiva")) ? 0 : reader.GetInt32(reader.GetOrdinal("cDirectiva")),
+                                    CFans = reader.IsDBNull(reader.GetOrdinal("cFans")) ? 0 : reader.GetInt32(reader.GetOrdinal("cFans")),
+                                    CJugadores = reader.IsDBNull(reader.GetOrdinal("cJugadores")) ? 0 : reader.GetInt32(reader.GetOrdinal("cJugadores")),
+                                    Reputacion = reader.IsDBNull(reader.GetOrdinal("reputacion")) ? 0 : reader.GetInt32(reader.GetOrdinal("reputacion")),
+                                    PartidosJugados = reader.IsDBNull(reader.GetOrdinal("partidosJugados")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosJugados")),
+                                    PartidosGanados = reader.IsDBNull(reader.GetOrdinal("partidosGanados")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosGanados")),
+                                    PartidosEmpatados = reader.IsDBNull(reader.GetOrdinal("partidosEmpatados")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosEmpatados")),
+                                    PartidosPerdidos = reader.IsDBNull(reader.GetOrdinal("partidosPerdidos")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosPerdidos")),
+                                    Puntos = reader.IsDBNull(reader.GetOrdinal("puntos")) ? 0 : reader.GetInt32(reader.GetOrdinal("puntos")),
+                                    Tactica = reader.GetString(reader.GetOrdinal("tactica")),
+                                    Despedido = reader.GetInt32(reader.GetOrdinal("despedido")),
+                                    RutaImagen = reader["ruta_imagen"]?.ToString() ?? string.Empty,
+                                    PrimeraTemporada = reader.GetInt32(reader.GetOrdinal("primera_temporada"))
+                                };
+                            }
+                        }
+                    }
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return coach;
+        }
+
         // ----------------------------------------------------------------------------------- MÉTODO QUE ELIMINA UN MANAGER
         public static void EliminarManager()
         {
@@ -209,72 +275,6 @@ namespace TacticalEleven.Scripts
             {
                 Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
             }
-        }
-
-        // ------------------------------------------------------------------------- MÉTODO QUE MUESTRA LOS DATOS DEL MÁNAGER
-        public static Manager MostrarManager()
-        {
-            Manager coach = null; // Inicializamos la variable como null
-
-            try
-            {
-                // Usa la base activa (temporal si existe)
-                string dbPath = DatabaseManager.GetActiveDatabasePath();
-
-                if (!File.Exists(dbPath))
-                {
-                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
-                    return null;
-                }
-
-                string connString = $"Data Source={dbPath};Version=3;";
-                using (var connection = new SQLiteConnection(connString))
-                {
-                    connection.Open();
-
-                    string query = @"SELECT * FROM managers WHERE id_manager = 1;";
-
-                    using (var cmd = new SQLiteCommand(query, connection))
-                    {
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read()) // Si se encuentra un registro
-                            {
-                                coach = new Manager
-                                {
-                                    IdManager = reader.GetInt32(reader.GetOrdinal("id_manager")),
-                                    Nombre = reader.GetString(reader.GetOrdinal("nombre")),
-                                    Apellido = reader.GetString(reader.GetOrdinal("apellido")),
-                                    Nacionalidad = reader.GetString(reader.GetOrdinal("nacionalidad")),
-                                    FechaNacimiento = reader.GetString(reader.GetOrdinal("fechaNacimiento")),
-                                    IdEquipo = reader.IsDBNull(reader.GetOrdinal("id_equipo")) ? 0 : reader.GetInt32(reader.GetOrdinal("id_equipo")),
-                                    CDirectiva = reader.IsDBNull(reader.GetOrdinal("cDirectiva")) ? 0 : reader.GetInt32(reader.GetOrdinal("cDirectiva")),
-                                    CFans = reader.IsDBNull(reader.GetOrdinal("cFans")) ? 0 : reader.GetInt32(reader.GetOrdinal("cFans")),
-                                    CJugadores = reader.IsDBNull(reader.GetOrdinal("cJugadores")) ? 0 : reader.GetInt32(reader.GetOrdinal("cJugadores")),
-                                    Reputacion = reader.IsDBNull(reader.GetOrdinal("reputacion")) ? 0 : reader.GetInt32(reader.GetOrdinal("reputacion")),
-                                    PartidosJugados = reader.IsDBNull(reader.GetOrdinal("partidosJugados")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosJugados")),
-                                    PartidosGanados = reader.IsDBNull(reader.GetOrdinal("partidosGanados")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosGanados")),
-                                    PartidosEmpatados = reader.IsDBNull(reader.GetOrdinal("partidosEmpatados")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosEmpatados")),
-                                    PartidosPerdidos = reader.IsDBNull(reader.GetOrdinal("partidosPerdidos")) ? 0 : reader.GetInt32(reader.GetOrdinal("partidosPerdidos")),
-                                    Puntos = reader.IsDBNull(reader.GetOrdinal("puntos")) ? 0 : reader.GetInt32(reader.GetOrdinal("puntos")),
-                                    Tactica = reader.GetString(reader.GetOrdinal("tactica")),
-                                    Despedido = reader.GetInt32(reader.GetOrdinal("despedido")),
-                                    RutaImagen = reader["ruta_imagen"]?.ToString() ?? string.Empty,
-                                    PrimeraTemporada = reader.GetInt32(reader.GetOrdinal("primera_temporada"))
-                                };
-                            }
-                        }
-                    }
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
-            }
-
-            return coach;
         }
 
         // ------------------------------------------------------------------ MÉTODO QUE ACTUALIZA LOS PARTIDOS DE UN MÁNAGER

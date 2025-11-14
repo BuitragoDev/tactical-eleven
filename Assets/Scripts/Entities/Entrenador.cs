@@ -1,21 +1,23 @@
+#nullable enable
+
 namespace TacticalEleven.Scripts
 {
     public class Entrenador
     {
         // Atributos
         public int IdEntrenador { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
+        public string Nombre { get; set; } = null!;
+        public string Apellido { get; set; } = null!;
         public int Reputacion { get; set; }
         public int Puntos { get; set; }
         public int? IdEquipo { get; set; }
-        public string TacticaFavorita { get; set; }
-        public string RutaImagen { get; set; }
+        public string TacticaFavorita { get; set; } = null!;
+        public string RutaImagen { get; set; } = null!;
 
         // Atributos extras
         public int Posicion { get; set; }
-        public string NombreCompleto { get; set; }
-        public string NombreEquipo { get; set; }
+        public string NombreCompleto { get; set; } = null!;
+        public string NombreEquipo { get; set; } = null!;
 
         // Constructor sin parámetros
         public Entrenador() { }

@@ -41,7 +41,7 @@ namespace TacticalEleven.Scripts
         }
 
         // ----------------------------------------------------------------------- Método que devuelve la fecha de hoy
-        public Fecha ObtenerFechaHoy()
+        public static Fecha ObtenerFechaHoy()
         {
             var dbPath = GetDBPath();
 

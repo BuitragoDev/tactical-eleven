@@ -1,31 +1,33 @@
+#nullable enable
+
 namespace TacticalEleven.Scripts
 {
     public class Equipo
     {
         // Propiedades
         public int IdEquipo { get; set; }
-        public string Nombre { get; set; }
-        public string NombreCorto { get; set; }
-        public string Presidente { get; set; }
+        public string Nombre { get; set; } = null!;
+        public string NombreCorto { get; set; } = null!;
+        public string Presidente { get; set; } = null!;
         public int Presupuesto { get; set; }
-        public string Pais { get; set; }
-        public string Ciudad { get; set; }
-        public string Estadio { get; set; }
+        public string Pais { get; set; } = null!;
+        public string Ciudad { get; set; } = null!;
+        public string Estadio { get; set; } = null!;
         public int Aforo { get; set; }
         public int Reputacion { get; set; }
-        public string Objetivo { get; set; }
+        public string Objetivo { get; set; } = null!;
         public int Rival { get; set; }
         public int IdCompeticion { get; set; }
         public int CompeticionEuropea { get; set; }
-        public string RutaImagen { get; set; }
-        public string RutaImagen120 { get; set; }
-        public string RutaImagen80 { get; set; }
-        public string RutaImagen64 { get; set; }
-        public string RutaImagen32 { get; set; }
-        public string RutaEstadioInterior { get; set; }
-        public string RutaEstadioExterior { get; set; }
-        public string RutaKitLocal { get; set; }
-        public string RutaKitVisitante { get; set; }
+        public string RutaImagen { get; set; } = null!;
+        public string RutaImagen120 { get; set; } = null!;
+        public string RutaImagen80 { get; set; } = null!;
+        public string RutaImagen64 { get; set; } = null!;
+        public string RutaImagen32 { get; set; } = null!;
+        public string RutaEstadioInterior { get; set; } = null!;
+        public string RutaEstadioExterior { get; set; } = null!;
+        public string RutaKitLocal { get; set; } = null!;
+        public string RutaKitVisitante { get; set; } = null!;
 
         // Nuevas propiedades para el entrenador.
         public string? Entrenador { get; set; } // Nombre completo del entrenador
