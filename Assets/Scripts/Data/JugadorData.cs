@@ -140,5 +140,196 @@ namespace TacticalEleven.Scripts
                 Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
             }
         }
+
+        // ------------------------------------------------------------------- MÉTODO PARA MOSTRAR LA MEDIA DE EQUIPO
+        public static double ObtenerMediaEquipo(int idEquipo)
+        {
+            var dbPath = GetDBPath();
+            double media = 0;
+
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return 0;
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"SELECT velocidad, resistencia, agresividad, calidad, estado_forma, moral 
+                                     FROM jugadores 
+                                     WHERE id_equipo = @IdEquipo";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdEquipo", idEquipo);
+                        using (var reader = comando.ExecuteReader())
+                        {
+                            var medias = new List<double>();
+
+                            while (reader.Read())
+                            {
+                                int velocidad = reader.GetInt32(0);
+                                int resistencia = reader.GetInt32(1);
+                                int agresividad = reader.GetInt32(2);
+                                int calidad = reader.GetInt32(3);
+                                int estadoForma = reader.GetInt32(4);
+                                int moral = reader.GetInt32(5);
+
+                                double mediaJugador = (velocidad + resistencia + agresividad + calidad + estadoForma + moral) / 6.0;
+
+                                medias.Add(mediaJugador);
+                            }
+
+                            if (medias.Any())
+                            {
+                                media = medias.Average();
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return media;
+        }
+
+        // ------------------------------------------------------------------- MÉTODO PARA MOSTRAR LOS DATOS DE UN JUGADOR
+        public static Jugador MostrarDatosJugador(int id)
+        {
+            Jugador jugador = null;
+
+            try
+            {
+                var dbPath = GetDBPath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"SELECT 
+                                        j.id_jugador,
+                                        j.nombre,
+                                        j.apellido,
+                                        j.peso,
+                                        j.altura,
+                                        j.nacionalidad,
+                                        j.dorsal,
+                                        j.fecha_nacimiento,
+                                        j.rol_id,
+                                        j.rol,
+                                        j.velocidad,
+                                        j.resistencia,
+                                        j.agresividad,
+                                        j.calidad,
+                                        j.estado_forma,
+                                        j.moral,
+                                        j.potencial,
+                                        j.portero,
+                                        j.pase,
+                                        j.regate,
+                                        j.remate,
+                                        j.entradas,
+                                        j.tiro,
+                                        j.lesion,
+                                        j.tipo_lesion,
+                                        j.lesion_tratada,
+                                        j.valor_mercado,
+                                        j.estado_animo, 
+                                        j.situacion_mercado,
+                                        j.id_equipo,
+                                        j.status,
+                                        j.proxima_negociacion,
+                                        j.ruta_imagen,
+                                        c.duracion AS AniosContrato,
+                                        c.salario_anual AS SalarioTemporada,
+                                        c.clausula_rescision AS ClausulaRescision,
+                                        c.bono_por_partidos AS BonoPartidos,
+                                        c.bono_por_goles AS BonoGoles,
+                                        e.nombre AS NombreEquipo
+                                    FROM jugadores j
+                                    LEFT JOIN equipos e ON e.id_equipo = j.id_equipo
+                                    LEFT JOIN contratos c ON j.id_jugador = c.id_jugador
+                                    WHERE j.id_jugador = @IdJugador";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", id);
+                        using (SQLiteDataReader dr = comando.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                // Crear un objeto Jugador y asignar los valores de la base de datos
+                                jugador = new Jugador
+                                {
+                                    IdJugador = dr.GetInt32(dr.GetOrdinal("id_jugador")),
+                                    Nombre = dr.GetString(dr.GetOrdinal("nombre")),
+                                    Apellido = dr.GetString(dr.GetOrdinal("apellido")),
+                                    Peso = dr.GetInt32(dr.GetOrdinal("peso")),
+                                    Altura = dr.GetInt32(dr.GetOrdinal("altura")),
+                                    Nacionalidad = dr.GetString(dr.GetOrdinal("nacionalidad")),
+                                    Dorsal = dr.GetInt32(dr.GetOrdinal("dorsal")),
+                                    FechaNacimiento = DateTime.Parse(dr.GetString(dr.GetOrdinal("fecha_nacimiento"))),
+                                    RolId = dr.GetInt32(dr.GetOrdinal("rol_id")),
+                                    Rol = dr.GetString(dr.GetOrdinal("rol")),
+                                    Velocidad = dr.GetInt32(dr.GetOrdinal("velocidad")),
+                                    Resistencia = dr.GetInt32(dr.GetOrdinal("resistencia")),
+                                    Agresividad = dr.GetInt32(dr.GetOrdinal("agresividad")),
+                                    Calidad = dr.GetInt32(dr.GetOrdinal("calidad")),
+                                    EstadoForma = dr.GetInt32(dr.GetOrdinal("estado_forma")),
+                                    Moral = dr.GetInt32(dr.GetOrdinal("moral")),
+                                    Potencial = dr.GetInt32(dr.GetOrdinal("potencial")),
+                                    Portero = dr.GetInt32(dr.GetOrdinal("portero")),
+                                    Pase = dr.GetInt32(dr.GetOrdinal("pase")),
+                                    Regate = dr.GetInt32(dr.GetOrdinal("regate")),
+                                    Remate = dr.GetInt32(dr.GetOrdinal("remate")),
+                                    Entradas = dr.GetInt32(dr.GetOrdinal("entradas")),
+                                    Tiro = dr.GetInt32(dr.GetOrdinal("tiro")),
+                                    Lesion = dr.GetInt32(dr.GetOrdinal("lesion")),
+                                    TipoLesion = dr.IsDBNull(dr.GetOrdinal("tipo_lesion")) ? null : dr.GetString(dr.GetOrdinal("tipo_lesion")),
+                                    LesionTratada = dr.GetInt32(dr.GetOrdinal("lesion_tratada")),
+                                    ValorMercado = dr.GetInt32(dr.GetOrdinal("valor_mercado")),
+                                    EstadoAnimo = dr.GetInt32(dr.GetOrdinal("estado_animo")),
+                                    RutaImagen = dr.GetString(dr.GetOrdinal("ruta_imagen")),
+                                    NombreEquipo = dr.GetString(dr.GetOrdinal("NombreEquipo")),
+                                    SituacionMercado = dr.IsDBNull(dr.GetOrdinal("situacion_mercado")) ? 0 : dr.GetInt32(dr.GetOrdinal("situacion_mercado")),
+                                    IdEquipo = dr.GetInt32(dr.GetOrdinal("id_equipo")),
+                                    AniosContrato = dr.IsDBNull(dr.GetOrdinal("AniosContrato")) ? null : dr.GetInt32(dr.GetOrdinal("AniosContrato")),
+                                    SalarioTemporada = dr.IsDBNull(dr.GetOrdinal("SalarioTemporada")) ? null : dr.GetInt32(dr.GetOrdinal("SalarioTemporada")),
+                                    BonusPartido = dr.IsDBNull(dr.GetOrdinal("BonoPartidos")) ? null : dr.GetInt32(dr.GetOrdinal("BonoPartidos")),
+                                    BonusGoles = dr.IsDBNull(dr.GetOrdinal("BonoGoles")) ? null : dr.GetInt32(dr.GetOrdinal("BonoGoles")),
+                                    ClausulaRescision = dr.IsDBNull(dr.GetOrdinal("ClausulaRescision")) ? null : dr.GetInt32(dr.GetOrdinal("ClausulaRescision")),
+                                    Status = dr.GetInt32(dr.GetOrdinal("status")),
+                                    ProximaNegociacion = dr.IsDBNull(dr.GetOrdinal("proxima_negociacion")) ? (DateTime?)null : dr.GetDateTime(dr.GetOrdinal("proxima_negociacion"))
+                                };
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return jugador;
+        }
     }
 }

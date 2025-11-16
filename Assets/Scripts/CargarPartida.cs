@@ -259,7 +259,6 @@ namespace TacticalEleven.Scripts
             return cont;
         }
 
-
         // ============================
         // CARGAR PARTIDA
         // ============================

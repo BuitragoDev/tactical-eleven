@@ -706,6 +706,215 @@ namespace TacticalEleven.Scripts
             CrearPartidoCopaEuropa2(equipos[25].IdEquipo, equipos[14].IdEquipo, fechaInicio.AddDays(119).ToString("yyyy-MM-dd"), idCompeticion, 8, 0, 0);
         }
 
+        // ----------------------------------------------------------------- METODO QUE DEVUELVE EL ÚLTIMO PARTIDO DE MI EQUIPO
+        public static Partido ObtenerUltimoPartido(int equipo, DateTime hoy)
+        {
+            var dbPath = GetDBPath();
+
+            Partido partido = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+                using (var comando = conexion.CreateCommand())
+                {
+                    comando.CommandText = @"SELECT fecha, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, id_competicion, 
+                                                CASE WHEN source = 'liga' THEN jornada ELSE 0 END AS jornada,
+                                                CASE 
+                                                    WHEN source = 'copa' THEN id_ronda 
+                                                    WHEN source = 'europa1' THEN id_ronda 
+                                                    WHEN source = 'europa2' THEN id_ronda 
+                                                    ELSE NULL 
+                                                END AS ronda
+                                             FROM (
+                                                -- Liga
+                                                SELECT fecha, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, id_competicion, 
+                                                    jornada, NULL AS id_ronda, 'liga' AS source
+                                                FROM partidos
+                                                WHERE 
+                                                    (id_equipo_local = @IdEquipo OR id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(fecha) < DATE(@Hoy)
+
+                                                UNION ALL
+
+                                                -- Copa Nacional
+                                                SELECT fecha, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, id_competicion, 
+                                                    0 AS jornada, id_ronda, 'copa' AS source
+                                                FROM partidos_copaNacional
+                                                WHERE 
+                                                    (id_equipo_local = @IdEquipo OR id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(fecha) < DATE(@Hoy)
+
+                                                UNION ALL
+
+                                                -- Copa Europa 1
+                                                SELECT fecha, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, id_competicion, 
+                                                    0 AS jornada, id_ronda, 'europa1' AS source
+                                                FROM partidos_copaEuropa1
+                                                WHERE 
+                                                    (id_equipo_local = @IdEquipo OR id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(fecha) < DATE(@Hoy)
+
+                                                UNION ALL
+
+                                                -- Copa Europa 2
+                                                SELECT fecha, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, id_competicion, 
+                                                    0 AS jornada, id_ronda, 'europa2' AS source
+                                                FROM partidos_copaEuropa2
+                                                WHERE 
+                                                    (id_equipo_local = @IdEquipo OR id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(fecha) < DATE(@Hoy)
+                                             )
+                                             ORDER BY fecha DESC
+                                             LIMIT 1";
+
+                    comando.Parameters.AddWithValue("@IdEquipo", equipo);
+                    comando.Parameters.AddWithValue("@Hoy", hoy.Date);
+
+                    using (SQLiteDataReader reader = comando.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            partido = new Partido
+                            {
+                                FechaPartido = DateTime.Parse(reader["fecha"]?.ToString() ?? "2000-01-01"),
+                                IdEquipoLocal = Convert.ToInt32(reader["id_equipo_local"]),
+                                IdEquipoVisitante = Convert.ToInt32(reader["id_equipo_visitante"]),
+                                GolesLocal = reader["goles_local"] != DBNull.Value ? Convert.ToInt32(reader["goles_local"]) : 0,
+                                GolesVisitante = reader["goles_visitante"] != DBNull.Value ? Convert.ToInt32(reader["goles_visitante"]) : 0,
+                                IdCompeticion = reader["id_competicion"] != DBNull.Value ? Convert.ToInt32(reader["id_competicion"]) : 0,
+                                Jornada = Convert.ToInt32(reader["jornada"]),
+                                Ronda = reader["ronda"] != DBNull.Value ? Convert.ToInt32(reader["ronda"]) : (int?)null
+                            };
+                        }
+                    }
+                }
+            }
+
+            return partido;
+        }
+
+        // ------------------------------------------------------------------ METODO QUE DEVUELVE EL PRÓXIMO PARTIDO DE MI EQUIPO
+        public static Partido ObtenerProximoPartido(int equipo, DateTime hoy)
+        {
+            var dbPath = GetDBPath();
+
+            Partido partido = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+                using (var comando = conexion.CreateCommand())
+                {
+                    comando.CommandText = @"SELECT * FROM (SELECT 
+                                                    p.id_partido,
+                                                    p.fecha, 
+                                                    p.jornada,
+                                                    NULL AS id_ronda,
+                                                    NULL AS partido_vuelta, 
+                                                    el.nombre AS nombreEquipoLocal, 
+                                                    ev.nombre AS nombreEquipoVisitante, 
+                                                    p.id_equipo_local, 
+                                                    p.id_equipo_visitante,
+                                                    p.goles_local,
+                                                    p.goles_visitante,
+                                                    p.id_competicion
+                                                FROM partidos p
+                                                JOIN equipos el ON p.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON p.id_equipo_visitante = ev.id_equipo
+                                                WHERE 
+                                                    (p.id_equipo_local = @IdEquipo OR p.id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(p.fecha) >= DATE(@Hoy)
+
+                                            UNION ALL
+
+                                                SELECT 
+                                                    pc.id_partido,
+                                                    pc.fecha, 
+                                                    NULL AS jornada,
+                                                    pc.id_ronda,
+                                                    pc.partido_vuelta,
+                                                    el.nombre AS nombreEquipoLocal, 
+                                                    ev.nombre AS nombreEquipoVisitante, 
+                                                    pc.id_equipo_local, 
+                                                    pc.id_equipo_visitante,
+                                                    pc.goles_local,
+                                                    pc.goles_visitante,
+                                                    pc.id_competicion
+                                                FROM partidos_copaNacional pc
+                                                JOIN equipos el ON pc.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON pc.id_equipo_visitante = ev.id_equipo
+                                                WHERE 
+                                                    (pc.id_equipo_local = @IdEquipo OR pc.id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(pc.fecha) >= DATE(@Hoy)
+
+                                            UNION ALL
+
+                                                SELECT 
+                                                    pe1.id_partido,
+                                                    pe1.fecha, 
+                                                    pe1.jornada,
+                                                    pe1.id_ronda,
+                                                    pe1.partido_vuelta, 
+                                                    el.nombre AS nombreEquipoLocal, 
+                                                    ev.nombre AS nombreEquipoVisitante, 
+                                                    pe1.id_equipo_local, 
+                                                    pe1.id_equipo_visitante,
+                                                    pe1.goles_local,
+                                                    pe1.goles_visitante,
+                                                    pe1.id_competicion
+                                                FROM partidos_copaEuropa1 pe1
+                                                JOIN equipos el ON pe1.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON pe1.id_equipo_visitante = ev.id_equipo
+                                                WHERE 
+                                                    (pe1.id_equipo_local = @IdEquipo OR pe1.id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(pe1.fecha) >= DATE(@Hoy)
+                                        )
+                                        ORDER BY fecha ASC
+                                        LIMIT 1";
+
+                    comando.Parameters.AddWithValue("@IdEquipo", equipo);
+                    comando.Parameters.AddWithValue("@Hoy", hoy.Date);
+
+                    using (SQLiteDataReader reader = comando.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            partido = new Partido
+                            {
+                                IdPartido = Convert.ToInt32(reader["id_partido"]),
+                                FechaPartido = reader["fecha"] != DBNull.Value && DateTime.TryParse(reader["fecha"].ToString(), out DateTime fecha)
+                                                   ? fecha
+                                                   : DateTime.Parse("2000-01-01"),
+                                Jornada = reader["jornada"] != DBNull.Value ? Convert.ToInt32(reader["jornada"]) : 0,
+                                Ronda = reader["id_ronda"] != DBNull.Value ? Convert.ToInt32(reader["id_ronda"]) : 0,
+                                PartidoVuelta = reader["partido_vuelta"] != DBNull.Value ? Convert.ToInt32(reader["partido_vuelta"]) : 0,
+                                IdEquipoLocal = Convert.ToInt32(reader["id_equipo_local"]),
+                                IdEquipoVisitante = Convert.ToInt32(reader["id_equipo_visitante"]),
+                                GolesLocal = reader["goles_local"] != DBNull.Value ? Convert.ToInt32(reader["goles_local"]) : 0,
+                                GolesVisitante = reader["goles_visitante"] != DBNull.Value ? Convert.ToInt32(reader["goles_visitante"]) : 0,
+                                IdCompeticion = reader["id_competicion"] != DBNull.Value ? Convert.ToInt32(reader["id_competicion"]) : 0
+                            };
+                        }
+                    }
+                }
+            }
+
+            return partido;
+        }
+
         // ------------------------------------------------------------------------ MÉTODO QUE OBTIENE EL TERCER SÁBADO DE AGOSTO 
         public static DateTime ObtenerTercerSabadoDeAgosto(int anio)
         {

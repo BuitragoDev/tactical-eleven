@@ -1,5 +1,7 @@
 #nullable enable
 
+using System;
+
 public class Fecha
 {
     // Propiedades que corresponden a los campos de la tabla SQL
@@ -25,6 +27,11 @@ public class Fecha
     {
         Hoy = hoy;
         Anio = anio;
+    }
+
+    public DateTime ToDateTime()
+    {
+        return DateTime.Parse(Hoy);
     }
 
     // Sobrescribir el método ToString

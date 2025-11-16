@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -222,6 +224,233 @@ namespace TacticalEleven.Scripts
             {
                 Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
             }
+        }
+
+        // ------------------------------------------------------------------ MÉTODO QUE CREA EL OBJETO DE LA CLASIFICACIÓN DE UN EQUIPO
+        public static Clasificacion? MostrarClasificacionPorEquipo(int equipo, int competicion)
+        {
+            var dbPath = GetDBPath();
+
+            Clasificacion? clasificacionEquipo = null; // Cambiado a null para detectar si no se encuentra
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                using var comando = conexion.CreateCommand();
+                comando.CommandText = null;
+                if (competicion == 1)
+                {
+                    comando.CommandText = @"SELECT ROW_NUMBER() OVER (ORDER BY c.puntos DESC) AS Posicion,
+                                                c.id_equipo AS IdEquipo,
+                                                c.jugados AS Jugados,
+                                                c.ganados AS Ganados,
+                                                c.empatados AS Empatados,
+                                                c.perdidos AS Perdidos,
+                                                c.puntos AS Puntos,
+                                                c.local_victorias AS LocalVictorias,
+                                                c.local_derrotas AS LocalDerrotas,
+                                                c.visitante_victorias AS VisitanteVictorias,
+                                                c.visitante_derrotas AS VisitanteDerrotas,
+                                                c.goles_favor AS PuntosFavor,
+                                                c.goles_contra AS PuntosContra,
+                                                c.racha AS Racha,
+                                                e.nombre AS NombreEquipo
+                                            FROM clasificacion c
+                                            INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                            WHERE c.id_equipo = @IdEquipo
+                                            ORDER BY c.puntos DESC";
+                }
+                else if (competicion == 5)
+                {
+                    comando.CommandText = @"SELECT ROW_NUMBER() OVER (ORDER BY c.puntos DESC) AS Posicion,
+                                                c.id_equipo AS IdEquipo,
+                                                c.jugados AS Jugados,
+                                                c.ganados AS Ganados,
+                                                c.empatados AS Empatados,
+                                                c.perdidos AS Perdidos,
+                                                c.puntos AS Puntos,
+                                                c.local_victorias AS LocalVictorias,
+                                                c.local_derrotas AS LocalDerrotas,
+                                                c.visitante_victorias AS VisitanteVictorias,
+                                                c.visitante_derrotas AS VisitanteDerrotas,
+                                                c.goles_favor AS PuntosFavor,
+                                                c.goles_contra AS PuntosContra,
+                                                c.racha AS Racha,
+                                                e.nombre AS NombreEquipo
+                                            FROM clasificacion_europa1 c
+                                            INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                            WHERE c.id_equipo = @IdEquipo
+                                            ORDER BY c.puntos DESC";
+                }
+                else if (competicion == 6)
+                {
+                    comando.CommandText = @"SELECT ROW_NUMBER() OVER (ORDER BY c.puntos DESC) AS Posicion,
+                                                c.id_equipo AS IdEquipo,
+                                                c.jugados AS Jugados,
+                                                c.ganados AS Ganados,
+                                                c.empatados AS Empatados,
+                                                c.perdidos AS Perdidos,
+                                                c.puntos AS Puntos,
+                                                c.local_victorias AS LocalVictorias,
+                                                c.local_derrotas AS LocalDerrotas,
+                                                c.visitante_victorias AS VisitanteVictorias,
+                                                c.visitante_derrotas AS VisitanteDerrotas,
+                                                c.goles_favor AS PuntosFavor,
+                                                c.goles_contra AS PuntosContra,
+                                                c.racha AS Racha,
+                                                e.nombre AS NombreEquipo
+                                            FROM clasificacion_europa2 c
+                                            INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                            WHERE c.id_equipo = @IdEquipo
+                                            ORDER BY c.puntos DESC";
+                }
+                else
+                {
+                    comando.CommandText = @"SELECT ROW_NUMBER() OVER (ORDER BY c.puntos DESC) AS Posicion,
+                                                c.id_equipo AS IdEquipo,
+                                                c.jugados AS Jugados,
+                                                c.ganados AS Ganados,
+                                                c.empatados AS Empatados,
+                                                c.perdidos AS Perdidos,
+                                                c.puntos AS Puntos,
+                                                c.local_victorias AS LocalVictorias,
+                                                c.local_derrotas AS LocalDerrotas,
+                                                c.visitante_victorias AS VisitanteVictorias,
+                                                c.visitante_derrotas AS VisitanteDerrotas,
+                                                c.goles_favor AS PuntosFavor,
+                                                c.goles_contra AS PuntosContra,
+                                                c.racha AS Racha,
+                                                e.nombre AS NombreEquipo
+                                            FROM clasificacion2 c
+                                            INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                            WHERE c.id_equipo = @IdEquipo
+                                            ORDER BY c.puntos DESC";
+                }
+                comando.Parameters.AddWithValue("@IdEquipo", equipo);
+
+                using (SQLiteDataReader reader = comando.ExecuteReader())
+                {
+                    if (reader.Read()) // Si encuentra un registro
+                    {
+                        clasificacionEquipo = new Clasificacion
+                        {
+                            Posicion = reader.GetInt32(0),
+                            IdEquipo = reader.GetInt32(1),
+                            Jugados = reader.GetInt32(2),
+                            Ganados = reader.GetInt32(3),
+                            Empatados = reader.GetInt32(4),
+                            Perdidos = reader.GetInt32(5),
+                            Puntos = reader.GetInt32(6),
+                            LocalVictorias = reader.GetInt32(7),
+                            LocalDerrotas = reader.GetInt32(8),
+                            VisitanteVictorias = reader.GetInt32(9),
+                            VisitanteDerrotas = reader.GetInt32(10),
+                            GolesFavor = reader.GetInt32(11),
+                            GolesContra = reader.GetInt32(12),
+                            Racha = reader.GetInt32(13),
+                            NombreEquipo = reader.GetString(14)
+                        };
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al crear el partido: {ex.Message}");
+                return null;
+            }
+
+            return clasificacionEquipo;
+        }
+
+        // --------------------------------------------------------------------- MÉTODO QUE MUESTRA LA CLASIFICACIÓN DE LA DIVISIÓN 1
+        public static List<Clasificacion> MostrarClasificacion(int competicion)
+        {
+            var dbPath = GetDBPath();
+            List<Clasificacion> clasificaciones = new List<Clasificacion>();
+            string tablaClasificacion;
+
+            // Determina la tabla según el valor de la competición
+            if (competicion == 1)
+                tablaClasificacion = "clasificacion";
+            else if (competicion == 2)
+                tablaClasificacion = "clasificacion2";
+            else
+                throw new ArgumentException("Competición no válida");
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                using var comando = conexion.CreateCommand();
+                comando.CommandText = $@"SELECT ROW_NUMBER() OVER (ORDER BY c.puntos DESC, (c.goles_favor - c.goles_contra) DESC) AS Posicion,
+                                               c.id_equipo AS IdEquipo,
+                                               c.jugados AS Jugados,
+                                               c.ganados AS Ganados,
+                                               c.empatados AS Empatados,
+                                               c.perdidos AS Perdidos,
+                                               c.puntos AS Puntos,
+                                               c.local_victorias AS LocalVictorias,
+                                               c.local_derrotas AS LocalDerrotas,
+                                               c.visitante_victorias AS VisitanteVictorias,
+                                               c.visitante_derrotas AS VisitanteDerrotas,
+                                               c.goles_favor AS GolesFavor,
+                                               c.goles_contra AS GolesContra,
+                                               c.racha AS Racha,
+                                               e.nombre AS NombreEquipo
+                                        FROM {tablaClasificacion} c
+                                        INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                        WHERE e.id_competicion = @competicion
+                                        ORDER BY c.puntos DESC, (c.goles_favor - c.goles_contra) DESC";
+
+                comando.Parameters.AddWithValue("@competicion", competicion);
+
+                using (SQLiteDataReader reader = comando.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        clasificaciones.Add(new Clasificacion
+                        {
+                            Posicion = reader.GetInt32(0),
+                            IdEquipo = reader.GetInt32(1),
+                            Jugados = reader.GetInt32(2),
+                            Ganados = reader.GetInt32(3),
+                            Empatados = reader.GetInt32(4),
+                            Perdidos = reader.GetInt32(5),
+                            Puntos = reader.GetInt32(6),
+                            LocalVictorias = reader.GetInt32(7),
+                            LocalDerrotas = reader.GetInt32(8),
+                            VisitanteVictorias = reader.GetInt32(9),
+                            VisitanteDerrotas = reader.GetInt32(10),
+                            GolesFavor = reader.GetInt32(11),
+                            GolesContra = reader.GetInt32(12),
+                            Racha = reader.GetInt32(13),
+                            NombreEquipo = reader.GetString(14)
+                        });
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al crear el partido: {ex.Message}");
+            }
+
+            return clasificaciones;
         }
     }
 }

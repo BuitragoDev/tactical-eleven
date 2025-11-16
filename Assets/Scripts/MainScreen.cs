@@ -10,21 +10,22 @@ namespace TacticalEleven.Scripts
         [Header("Sound Clips")]
         [SerializeField] private AudioClip clickSFX;
 
+        // UI Elements
         private VisualElement miEquipoEscudo, cabeceraManagerValoracion;
-        private VisualElement homeIcon, clubIcon, alineacionIcon, competicionesIcon, calendarioIcon, fichajesIcon,
-                              finanzasIcon, estadioIcon, managerIcon, mensajesIcon, ajustesIcon;
+        private VisualElement homeIcon, clubIcon, alineacionIcon, competicionesIcon, calendarioIcon,
+                              fichajesIcon, finanzasIcon, estadioIcon, managerIcon, mensajesIcon, ajustesIcon;
         private VisualElement mainContainer;
         private Button btnSeguir;
         private Label miEquipoNombre, miPresupuesto, managerNombre, fecha1, fecha2;
-        Manager miManager;
-        Equipo miEquipo;
+        private Manager miManager;
+        private Equipo miEquipo;
 
         void OnEnable()
         {
             var uiDocument = GetComponent<UIDocument>();
             var root = uiDocument.rootVisualElement;
 
-            // Referencias a elementos pantalla principal
+            // --- Contenedores y elementos UI ---
             miEquipoEscudo = root.Q<VisualElement>("cabecera-escudo");
             miEquipoNombre = root.Q<Label>("miEquipoNombre");
             miPresupuesto = root.Q<Label>("miPresupuesto");
@@ -48,21 +49,32 @@ namespace TacticalEleven.Scripts
 
             mainContainer = root.Q<VisualElement>("main-container");
 
-            // Consulta a la BD
+            // --- UIManager ---
+            if (UIManager.Instance == null)
+            {
+                var go = new GameObject("UI Manager");
+                go.AddComponent<UIManager>();
+                Debug.Log("UIManager creado dinámicamente");
+            }
+
+            mainContainer = root.Q<VisualElement>("main-container");
+            UIManager.Instance.SetMainContainer(mainContainer);
+
+            // --- Cargar datos del manager y equipo ---
             miManager = ManagerData.MostrarManager();
             miEquipo = EquipoData.ObtenerDetallesEquipo((int)miManager.IdEquipo);
 
-            // Mostrar mi escudo en la cabecera.
+            // Escudo
             var sprite = Resources.Load<Sprite>($"EscudosEquipos/120x120/{miManager.IdEquipo}");
             if (sprite != null)
                 miEquipoEscudo.style.backgroundImage = new StyleBackground(sprite);
 
-            // Mostrar el nombre de mi equipo en la cabecera
+            // Nombre del equipo
             miEquipoNombre.text = miEquipo.Nombre;
 
-            // Mostrar el presupuesto en la cabecera
-            float presupuestoConversion = 0f;
-            string symbol = "€";
+            // Presupuesto
+            float presupuestoConversion = miEquipo.Presupuesto * Constants.EURO_VALUE;
+            string symbol = Constants.EURO_SYMBOL;
 
             string currency = PlayerPrefs.GetString("Currency", string.Empty);
             if (currency != string.Empty)
@@ -87,111 +99,58 @@ namespace TacticalEleven.Scripts
                         break;
                 }
             }
+
             miPresupuesto.text = $"{presupuestoConversion.ToString("N0")} {symbol}";
 
-            // Mostrar el nombre del manager en la cabecera
+            // Nombre del manager
             managerNombre.text = $"{miManager.Nombre} {miManager.Apellido}";
 
-            // Mostrar valoración del mánager en la cabecera
-            int reputacionManager = miManager.Reputacion;
-            MostrarEstrellas(reputacionManager);
+            // Valoración del manager
+            MostrarEstrellas(miManager.Reputacion);
 
-            // Mostrar fecha en la cabecera
+            // Fecha
             Fecha fechaObjeto = FechaData.ObtenerFechaHoy();
             DateTime hoy = DateTime.Parse(fechaObjeto.Hoy);
-            // Formatear la fecha en español
             CultureInfo culturaEspañol = new CultureInfo("es-ES");
-            string dia = hoy.ToString("dd", culturaEspañol); // Día
-            string mes = hoy.ToString("MMM", culturaEspañol).ToUpper(); // Mes abreviado en español y en mayúsculas
-            string año = hoy.ToString("yyyy", culturaEspañol); // Año
+            string dia = hoy.ToString("dd", culturaEspañol);
+            string mes = hoy.ToString("MMM", culturaEspañol).ToUpper();
+            string año = hoy.ToString("yyyy", culturaEspañol);
+            fecha1.text = $"{dia} {mes} {año}";
 
-            // Combinar el formato
-            string fechaFormateada = $"{dia} {mes} {año}";
-
-            // Mostrar la fecha
-            fecha1.text = fechaFormateada;
-
-            // Obtener el día de la semana en español
             string diaSemana = hoy.ToString("dddd", culturaEspañol);
-
-            // Capitalizar la primera letra (opcional, si el formato por defecto no es suficiente)
             diaSemana = char.ToUpper(diaSemana[0]) + diaSemana.Substring(1);
-
-            // Mostrar el día de la semana
             fecha2.text = diaSemana;
 
+            // --- Cargar portada al iniciar ---
             CargarPortada();
 
-            // Botón Avanzar de la cabecera
-            btnSeguir.clicked += () =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            };
+            // --- Botón seguir ---
+            btnSeguir.clicked += () => AudioManager.Instance.PlaySFX(clickSFX);
 
-            // Eventos iconos del Menu Lateral
+            // --- Eventos iconos menú lateral ---
             homeIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 CargarPortada();
             });
 
-            clubIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            alineacionIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            competicionesIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            calendarioIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            fichajesIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            finanzasIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            estadioIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            managerIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            mensajesIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                AudioManager.Instance.PlaySFX(clickSFX);
-            });
-
-            ajustesIcon.RegisterCallback<ClickEvent>(evt =>
-            {
-                SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE);
-            });
+            // Los demás iconos solo SFX por ahora
+            clubIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            alineacionIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            competicionesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            calendarioIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            fichajesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            finanzasIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            estadioIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            managerIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            mensajesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            ajustesIcon.RegisterCallback<ClickEvent>(evt => SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE));
         }
 
         private void MostrarEstrellas(int reputacion)
         {
-            // Limpiar el contenedor
             cabeceraManagerValoracion.Clear();
 
-            // Cargar las imágenes desde Resources
             Sprite estrellaON = Resources.Load<Sprite>("Icons/estrellaOn");
             Sprite estrellaOFF = Resources.Load<Sprite>("Icons/estrellaOff");
 
@@ -201,7 +160,6 @@ namespace TacticalEleven.Scripts
                 return;
             }
 
-            // Determinar el número de estrellas según la reputación
             int numeroEstrellas = reputacion switch
             {
                 100 => 5,
@@ -212,7 +170,6 @@ namespace TacticalEleven.Scripts
                 _ => 0
             };
 
-            // Crear 5 estrellas
             for (int i = 0; i < 5; i++)
             {
                 Image estrella = new Image
@@ -220,38 +177,24 @@ namespace TacticalEleven.Scripts
                     image = i < numeroEstrellas ? estrellaON.texture : estrellaOFF.texture,
                     scaleMode = ScaleMode.ScaleToFit,
                     style =
-            {
-                width = 32,
-                height = 32,
-                marginRight = 3 // separación horizontal
-            }
+                    {
+                        width = 32,
+                        height = 32,
+                        marginRight = 3
+                    }
                 };
-
                 cabeceraManagerValoracion.Add(estrella);
             }
 
-            // Opcional: usar un contenedor horizontal si quieres alinear automáticamente
             cabeceraManagerValoracion.style.flexDirection = FlexDirection.Row;
         }
 
         private void CargarPortada()
         {
-            mainContainer.Clear();
-
-            var tree = Resources.Load<VisualTreeAsset>("UI/PortadaScreen/Portada");
-            if (tree == null)
+            UIManager.Instance.CargarPantalla("UI/PortadaScreen/Portada", instancia =>
             {
-                Debug.LogError("No se encontró el UXML Portada en Resources/UI/PortadaScreen/Portada");
-                return;
-            }
-
-            var portadaInstance = tree.Instantiate();
-            portadaInstance.style.flexGrow = 1; // Asegura que llene el contenedor
-            portadaInstance.style.width = Length.Percent(100);
-            portadaInstance.style.height = Length.Percent(100);
-
-            mainContainer.Add(portadaInstance);
+                new PortadaManager(instancia, miEquipo, miManager);
+            });
         }
-
     }
 }
