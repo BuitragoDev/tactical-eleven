@@ -13,6 +13,8 @@ namespace TacticalEleven.Scripts
 
         void OnEnable()
         {
+            SceneLoader.setSettingsParameter(0);
+
             // Obtenemos root del UIDocument
             var uiDocument = GetComponent<UIDocument>();
             root = uiDocument.rootVisualElement;
@@ -38,6 +40,23 @@ namespace TacticalEleven.Scripts
                 if (SceneLoader.Instance != null)
                 {
                     SceneLoader.Instance.LoadScene(Constants.CREATE_MANAGER_SCENE);
+                }
+                else
+                {
+                    Debug.LogWarning("SceneLoader.Instance no encontrado. Asegúrate de que exista en la escena inicial.");
+                }
+            });
+
+            // --- AJUSTES ICON ICON ---
+            settings.RegisterCallback<ClickEvent>((evt) =>
+            {
+                if (SceneLoader.Instance != null && SceneLoader.Instance.transitionSFX != null && AudioManager.Instance != null)
+                    AudioManager.Instance.PlaySFX(SceneLoader.Instance.transitionSFX);
+
+                // Cambiar a la escena de Modo Manager
+                if (SceneLoader.Instance != null)
+                {
+                    SceneLoader.Instance.LoadScene(Constants.SETTINGS_SCREEN_SCENE);
                 }
                 else
                 {

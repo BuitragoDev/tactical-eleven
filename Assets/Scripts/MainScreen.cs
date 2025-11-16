@@ -22,6 +22,8 @@ namespace TacticalEleven.Scripts
 
         void OnEnable()
         {
+            SceneLoader.setSettingsParameter(1);
+
             var uiDocument = GetComponent<UIDocument>();
             var root = uiDocument.rootVisualElement;
 
@@ -134,6 +136,7 @@ namespace TacticalEleven.Scripts
                 CargarPortada();
             });
 
+
             // Los demás iconos solo SFX por ahora
             clubIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
             alineacionIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
@@ -144,7 +147,10 @@ namespace TacticalEleven.Scripts
             estadioIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
             managerIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
             mensajesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            ajustesIcon.RegisterCallback<ClickEvent>(evt => SceneLoader.Instance.LoadScene(Constants.MAIN_MENU_SCENE));
+            ajustesIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                SceneLoader.Instance.LoadScene(Constants.SETTINGS_SCREEN_SCENE);
+            });
         }
 
         private void MostrarEstrellas(int reputacion)

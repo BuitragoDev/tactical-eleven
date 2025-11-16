@@ -46,6 +46,7 @@ namespace TacticalEleven.Scripts
         public const string TEAM_OBJECTIVES_SCENE = "TeamObjectives";
         public const string MAIN_SCREEN_SCENE = "MainScreen";
         public const string LOAD_SCREEN_SCENE = "CargarPartida";
+        public const string SETTINGS_SCREEN_SCENE = "Settings";
 
         // -------------------------------------- NACIONALIDADES ---------------------------------------
         public static List<string> ObtenerTodasLasNacionalidades()

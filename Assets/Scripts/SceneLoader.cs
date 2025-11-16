@@ -6,6 +6,7 @@ namespace TacticalEleven.Scripts
     public class SceneLoader : MonoBehaviour
     {
         public static SceneLoader Instance;
+        public static int settingsParameter;
 
         [Header("Opcional: sonido de transición, y click")]
         public AudioClip clickSFX;
@@ -58,6 +59,16 @@ namespace TacticalEleven.Scripts
 #else
         Application.Quit();
 #endif
+        }
+
+        public static void setSettingsParameter(int value)
+        {
+            settingsParameter = value;
+        }
+
+        public static int getSettingsParameter()
+        {
+            return settingsParameter;
         }
     }
 }
