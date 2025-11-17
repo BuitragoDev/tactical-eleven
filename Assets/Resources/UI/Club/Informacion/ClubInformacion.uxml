@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/UI/Club/Informacion/ClubInformacion.uss?fileID=7433441132597879392&amp;guid=289490bb19dfcf14d8a5d17e5e91cb07&amp;type=3#ClubInformacion" />
+
+</ui:UXML>

@@ -1006,5 +1006,114 @@ namespace TacticalEleven.Scripts
 
             throw new Exception("No se encontró el tercer sábado de agosto.");
         }
+
+        // ----------------------------------------------------------------- METODO QUE DEVUELVE TODOS LOS PARTIDOS DE MI EQUIPO
+        public static List<Partido> MostrarMisPartidos(int equipo)
+        {
+            var dbPath = GetDBPath();
+
+            List<Partido> partidos = new List<Partido>();
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+                using (var comando = conexion.CreateCommand())
+                {
+                    comando.CommandText = @"SELECT 
+                                                p.fecha, 
+                                                el.nombre AS nombreEquipoLocal, 
+                                                ev.nombre AS nombreEquipoVisitante, 
+                                                p.id_equipo_local, 
+                                                p.id_equipo_visitante,
+                                                p.goles_local,
+                                                p.goles_visitante,
+                                                p.id_competicion
+                                            FROM partidos p
+                                            JOIN equipos el ON p.id_equipo_local = el.id_equipo
+                                            JOIN equipos ev ON p.id_equipo_visitante = ev.id_equipo
+                                            WHERE 
+                                                (p.id_equipo_local = @IdEquipo OR p.id_equipo_visitante = @IdEquipo)
+
+                                            UNION ALL
+
+                                            SELECT 
+                                                pc.fecha, 
+                                                el.nombre AS nombreEquipoLocal, 
+                                                ev.nombre AS nombreEquipoVisitante, 
+                                                pc.id_equipo_local, 
+                                                pc.id_equipo_visitante,
+                                                pc.goles_local,
+                                                pc.goles_visitante,
+                                                pc.id_competicion
+                                            FROM partidos_copaNacional pc
+                                            JOIN equipos el ON pc.id_equipo_local = el.id_equipo
+                                            JOIN equipos ev ON pc.id_equipo_visitante = ev.id_equipo
+                                            WHERE 
+                                                (pc.id_equipo_local = @IdEquipo OR pc.id_equipo_visitante = @IdEquipo)
+
+                                            UNION ALL
+
+                                            SELECT 
+                                                pe1.fecha, 
+                                                el.nombre AS nombreEquipoLocal, 
+                                                ev.nombre AS nombreEquipoVisitante, 
+                                                pe1.id_equipo_local, 
+                                                pe1.id_equipo_visitante,
+                                                pe1.goles_local,
+                                                pe1.goles_visitante,
+                                                pe1.id_competicion
+                                            FROM partidos_copaEuropa1 pe1
+                                            JOIN equipos el ON pe1.id_equipo_local = el.id_equipo
+                                            JOIN equipos ev ON pe1.id_equipo_visitante = ev.id_equipo
+                                            WHERE 
+                                                (pe1.id_equipo_local = @IdEquipo OR pe1.id_equipo_visitante = @IdEquipo)
+
+                                            UNION ALL
+
+                                            SELECT 
+                                                pe2.fecha, 
+                                                el.nombre AS nombreEquipoLocal, 
+                                                ev.nombre AS nombreEquipoVisitante, 
+                                                pe2.id_equipo_local, 
+                                                pe2.id_equipo_visitante,
+                                                pe2.goles_local,
+                                                pe2.goles_visitante,
+                                                pe2.id_competicion
+                                            FROM partidos_copaEuropa2 pe2
+                                            JOIN equipos el ON pe2.id_equipo_local = el.id_equipo
+                                            JOIN equipos ev ON pe2.id_equipo_visitante = ev.id_equipo
+                                            WHERE 
+                                                (pe2.id_equipo_local = @IdEquipo OR pe2.id_equipo_visitante = @IdEquipo)
+
+                                            ORDER BY fecha";
+
+                    comando.Parameters.AddWithValue("@IdEquipo", equipo);
+
+                    using (var reader = comando.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            partidos.Add(new Partido()
+                            {
+                                FechaPartido = DateTime.Parse(reader["fecha"]?.ToString() ?? "2000-01-01"),
+                                IdEquipoLocal = Convert.ToInt32(reader["id_equipo_local"]),
+                                IdEquipoVisitante = Convert.ToInt32(reader["id_equipo_visitante"]),
+                                GolesLocal = reader["goles_local"] != DBNull.Value ? Convert.ToInt32(reader["goles_local"]) : 0,
+                                GolesVisitante = reader["goles_visitante"] != DBNull.Value ? Convert.ToInt32(reader["goles_visitante"]) : 0,
+                                IdCompeticion = reader["id_competicion"] != DBNull.Value ? Convert.ToInt32(reader["id_competicion"]) : 0
+                            });
+                        }
+                    }
+                }
+            }
+
+            return partidos;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -14,6 +15,8 @@ namespace TacticalEleven.Scripts
         private VisualElement miEquipoEscudo, cabeceraManagerValoracion;
         private VisualElement homeIcon, clubIcon, alineacionIcon, competicionesIcon, calendarioIcon,
                               fichajesIcon, finanzasIcon, estadioIcon, managerIcon, mensajesIcon, ajustesIcon;
+        private VisualElement clubMenu, alineacionMenu, competicionMenu, calendarioMenu, fichajesMenu, finanzasMenu,
+                              estadioMenu, managerMenu, mensajesMenu;
         private VisualElement mainContainer;
         private Button btnSeguir;
         private Label miEquipoNombre, miPresupuesto, managerNombre, fecha1, fecha2;
@@ -50,6 +53,17 @@ namespace TacticalEleven.Scripts
             ajustesIcon = root.Q<VisualElement>("ajustes-icon");
 
             mainContainer = root.Q<VisualElement>("main-container");
+
+            // CLUB
+            clubMenu = root.Q<VisualElement>("clubMenu");
+            alineacionMenu = root.Q<VisualElement>("entrenadorMenu");
+            competicionMenu = root.Q<VisualElement>("competicionMenu");
+            calendarioMenu = root.Q<VisualElement>("calendarioMenu");
+            fichajesMenu = root.Q<VisualElement>("fichajesMenu");
+            finanzasMenu = root.Q<VisualElement>("finanzasMenu");
+            estadioMenu = root.Q<VisualElement>("estadioMenu");
+            managerMenu = root.Q<VisualElement>("managerMenu");
+            mensajesMenu = root.Q<VisualElement>("mensajesMenu");
 
             // --- UIManager ---
             if (UIManager.Instance == null)
@@ -130,27 +144,83 @@ namespace TacticalEleven.Scripts
             btnSeguir.clicked += () => AudioManager.Instance.PlaySFX(clickSFX);
 
             // --- Eventos iconos menú lateral ---
+            List<VisualElement> menuList = new List<VisualElement> { clubMenu, alineacionMenu, competicionMenu,
+                                                                     calendarioMenu, fichajesMenu, finanzasMenu,
+                                                                     estadioMenu, managerMenu, mensajesMenu
+                                                                   };
             homeIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, null);
                 CargarPortada();
             });
 
+            clubIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, clubMenu);
 
-            // Los demás iconos solo SFX por ahora
-            clubIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            alineacionIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            competicionesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            calendarioIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            fichajesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            finanzasIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            estadioIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            managerIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
-            mensajesIcon.RegisterCallback<ClickEvent>(evt => AudioManager.Instance.PlaySFX(clickSFX));
+            });
+            alineacionIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, alineacionMenu);
+            });
+            competicionesIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, competicionMenu);
+            });
+            calendarioIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, calendarioMenu);
+                CargarCalendario();
+            });
+            fichajesIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, fichajesMenu);
+            });
+            finanzasIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, finanzasMenu);
+            });
+            estadioIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, estadioMenu);
+            });
+            managerIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, managerMenu);
+            });
+            mensajesIcon.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                MenuVisibility(menuList, mensajesMenu);
+            });
             ajustesIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 SceneLoader.Instance.LoadScene(Constants.SETTINGS_SCREEN_SCENE);
             });
+        }
+
+        private void MenuVisibility(List<VisualElement> menus, VisualElement visibleMenu)
+        {
+            foreach (var menu in menus)
+            {
+                if (menu == visibleMenu && visibleMenu != null)
+                {
+                    menu.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    menu.style.display = DisplayStyle.None;
+                }
+            }
         }
 
         private void MostrarEstrellas(int reputacion)
@@ -200,6 +270,14 @@ namespace TacticalEleven.Scripts
             UIManager.Instance.CargarPantalla("UI/PortadaScreen/Portada", instancia =>
             {
                 new PortadaManager(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarCalendario()
+        {
+            UIManager.Instance.CargarPantalla("UI/Calendario/Calendario", instancia =>
+            {
+                new Calendario(instancia, miEquipo, miManager);
             });
         }
     }
