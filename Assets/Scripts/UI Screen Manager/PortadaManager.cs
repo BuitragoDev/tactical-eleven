@@ -232,7 +232,18 @@ namespace TacticalEleven.Scripts
                 fila.style.alignItems = Align.Center;
 
                 // Color de fondo de fila alternante (para todas las columnas)
-                Color filaColor = (index % 2 == 0) ? new Color32(255, 255, 255, 255) : new Color32(242, 242, 242, 255);
+                // Color estándar alterno
+                Color filaColor = (index % 2 == 0)
+                    ? new Color32(255, 255, 255, 255)     // blanco
+                    : new Color32(242, 242, 242, 255);    // gris suave
+
+                // Si esta fila es de mi equipo → color verde
+                if (item.IdEquipo == miEquipo.IdEquipo)
+                {
+                    filaColor = new Color32(197, 232, 202, 255); // #C5E8CA verde
+                }
+
+                // Aplicar color final
                 fila.style.backgroundColor = new StyleColor(filaColor);
 
                 // 1) Primera columna coloreada según posición (encima del fondo alternante)

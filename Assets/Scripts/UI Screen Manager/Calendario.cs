@@ -30,7 +30,6 @@ namespace TacticalEleven.Scripts
 
             clickSFX = Resources.Load<AudioClip>("Audios/click");
 
-            // Referencias
             // Referencias a elementos internos 
             calendarContainer = root.Q<VisualElement>("calendar-container");
             logoCompeticion = root.Q<VisualElement>("logoCompeticion");

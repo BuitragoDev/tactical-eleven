@@ -201,6 +201,7 @@ namespace TacticalEleven.Scripts
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, mensajesMenu);
+                CargarMensajes();
             });
             ajustesIcon.RegisterCallback<ClickEvent>(evt =>
             {
@@ -273,11 +274,20 @@ namespace TacticalEleven.Scripts
             });
         }
 
+
         private void CargarCalendario()
         {
-            UIManager.Instance.CargarPantalla("UI/Calendario/Calendario", instancia =>
+            UIManager.Instance.CargarPantalla("UI/CalendarioScreen/Calendario", instancia =>
             {
                 new Calendario(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarMensajes()
+        {
+            UIManager.Instance.CargarPantalla("UI/MensajesScreen/Mensajes", instancia =>
+            {
+                new Mensajes(instancia, miEquipo, miManager);
             });
         }
     }
