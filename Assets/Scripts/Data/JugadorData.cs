@@ -331,5 +331,185 @@ namespace TacticalEleven.Scripts
 
             return jugador;
         }
+
+        // ----------------------------------------------------------- MÉTODO PARA MOSTRAR LA LISTA DE JUGADORES DETALLADA POR EQUIPO
+        public static List<Jugador> ListadoJugadoresCompleto(int id)
+        {
+            List<Jugador> jugadores = new List<Jugador>();
+
+            try
+            {
+                var dbPath = GetDBPath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"SELECT j.*, c.duracion AS AniosContrato, c.salario_anual AS SalarioTemporada, c.clausula_rescision AS ClausulaRescision
+                                     FROM jugadores j
+                                     LEFT JOIN contratos c ON j.id_jugador = c.id_jugador
+                                     WHERE j.id_equipo = @idEquipo
+                                     ORDER BY j.rol_id ASC";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@idEquipo", id);
+                        using (SQLiteDataReader dr = comando.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                // Crear un objeto Jugador y asignar los valores de la base de datos
+                                Jugador jugador = new Jugador
+                                {
+                                    IdJugador = dr.GetInt32(dr.GetOrdinal("id_jugador")),
+                                    Nombre = dr.GetString(dr.GetOrdinal("nombre")),
+                                    Apellido = dr.GetString(dr.GetOrdinal("apellido")),
+                                    IdEquipo = dr.GetInt32(dr.GetOrdinal("id_equipo")),
+                                    Dorsal = dr.GetInt32(dr.GetOrdinal("dorsal")),
+                                    Rol = dr.GetString(dr.GetOrdinal("rol")),
+                                    RolId = dr.GetInt32(dr.GetOrdinal("rol_id")),
+                                    Velocidad = dr.GetInt32(dr.GetOrdinal("velocidad")),
+                                    Resistencia = dr.GetInt32(dr.GetOrdinal("resistencia")),
+                                    Agresividad = dr.GetInt32(dr.GetOrdinal("agresividad")),
+                                    Calidad = dr.GetInt32(dr.GetOrdinal("calidad")),
+                                    EstadoForma = dr.GetInt32(dr.GetOrdinal("estado_forma")),
+                                    Moral = dr.GetInt32(dr.GetOrdinal("moral")),
+                                    Potencial = dr.GetInt32(dr.GetOrdinal("potencial")),
+                                    Portero = dr.GetInt32(dr.GetOrdinal("portero")),
+                                    Pase = dr.GetInt32(dr.GetOrdinal("pase")),
+                                    Regate = dr.GetInt32(dr.GetOrdinal("regate")),
+                                    Remate = dr.GetInt32(dr.GetOrdinal("remate")),
+                                    Entradas = dr.GetInt32(dr.GetOrdinal("entradas")),
+                                    Tiro = dr.GetInt32(dr.GetOrdinal("tiro")),
+                                    FechaNacimiento = DateTime.Parse(dr.GetString(dr.GetOrdinal("fecha_nacimiento"))),
+                                    Peso = dr.GetInt32(dr.GetOrdinal("peso")),
+                                    Altura = dr.GetInt32(dr.GetOrdinal("altura")),
+                                    Lesion = dr.GetInt32(dr.GetOrdinal("lesion")),
+                                    TipoLesion = dr.IsDBNull(dr.GetOrdinal("tipo_lesion")) ? null : dr.GetString(dr.GetOrdinal("tipo_lesion")),
+                                    LesionTratada = dr.GetInt32(dr.GetOrdinal("lesion_tratada")),
+                                    Nacionalidad = dr.GetString(dr.GetOrdinal("nacionalidad")),
+                                    Status = dr.GetInt32(dr.GetOrdinal("status")),
+                                    Sancionado = dr.GetInt32(dr.GetOrdinal("sancionado")),
+                                    Entrenamiento = dr.GetInt32(dr.GetOrdinal("entrenamiento")),
+                                    RutaImagen = dr.GetString(dr.GetOrdinal("ruta_imagen")),
+                                    ValorMercado = dr.GetInt32(dr.GetOrdinal("valor_mercado")),
+                                    AniosContrato = dr.IsDBNull(dr.GetOrdinal("AniosContrato")) ? null : dr.GetInt32(dr.GetOrdinal("AniosContrato")),
+                                    SalarioTemporada = dr.IsDBNull(dr.GetOrdinal("SalarioTemporada")) ? null : dr.GetInt32(dr.GetOrdinal("SalarioTemporada")),
+                                    ClausulaRescision = dr.IsDBNull(dr.GetOrdinal("ClausulaRescision")) ? null : dr.GetInt32(dr.GetOrdinal("ClausulaRescision"))
+                                };
+
+                                // Agregar el jugador a la lista
+                                jugadores.Add(jugador);
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return jugadores;
+        }
+
+        // ------------------------------------------------------------------- MÉTODO QUE REDUCE UNA LESIÓN UN PORCENTAJE
+        public static void TratarLesion(int idJugador, int porcentaje)
+        {
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    // Paso 1: Obtener el valor actual de la lesión
+                    int lesionActual = 0;
+                    string selectQuery = "SELECT lesion FROM jugadores WHERE id_jugador = @IdJugador";
+                    using (SQLiteCommand selectCmd = new SQLiteCommand(selectQuery, conexion))
+                    {
+                        selectCmd.Parameters.AddWithValue("@IdJugador", idJugador);
+                        object result = selectCmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                            lesionActual = Convert.ToInt32(result);
+                    }
+
+                    // Paso 2: Calcular la nueva lesión
+                    double factor = (100 - porcentaje) / 100.0;
+                    int nuevaLesion = (int)Math.Round(lesionActual * factor);
+
+                    // Paso 3: Actualizar el valor de lesión
+                    string updateQuery = "UPDATE jugadores SET lesion = @NuevaLesion WHERE id_jugador = @IdJugador";
+                    using (SQLiteCommand updateCmd = new SQLiteCommand(updateQuery, conexion))
+                    {
+                        updateCmd.Parameters.AddWithValue("@NuevaLesion", nuevaLesion);
+                        updateCmd.Parameters.AddWithValue("@IdJugador", idJugador);
+                        updateCmd.ExecuteNonQuery();
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
+
+        // ------------------------------------------------------------------- MÉTODO QUE PONE AL JUGADOR EN TRATAMIENTO POR LESIÓN
+        public static void ActivarTratamientoLesion(int jugador, int valor)
+        {
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    // Consulta SQL para obtener las finanzas del equipo
+                    string query = @"UPDATE jugadores SET lesion_tratada = @Valor WHERE id_jugador = @IdJugador";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        // Agregar parámetro para evitar inyección SQL
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        comando.Parameters.AddWithValue("@Valor", valor);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
     }
 }

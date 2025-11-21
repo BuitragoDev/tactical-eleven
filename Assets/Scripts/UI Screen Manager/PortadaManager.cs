@@ -207,7 +207,7 @@ namespace TacticalEleven.Scripts
             headerEmpty.style.height = 30;
             header.Add(headerEmpty);
 
-            header.Add(CreateCell("POS", col2, headerText, TextAnchor.MiddleCenter));
+            header.Add(CreateCell("POS", col2, headerText, TextAnchor.MiddleCenter, true));
 
             // Columna ESCUDO de cabecera
             var headerEscudo = new VisualElement();
@@ -215,8 +215,8 @@ namespace TacticalEleven.Scripts
             headerEscudo.style.height = 30;
             header.Add(headerEscudo);
 
-            header.Add(CreateCell("EQUIPO", col4, headerText, TextAnchor.MiddleLeft));
-            header.Add(CreateCell("PTS", col5, headerText, TextAnchor.MiddleCenter));
+            header.Add(CreateCell("EQUIPO", col4, headerText, TextAnchor.MiddleLeft, true));
+            header.Add(CreateCell("PTS", col5, headerText, TextAnchor.MiddleCenter, true));
 
             clasificacionContainer.Add(header);
 
@@ -272,7 +272,7 @@ namespace TacticalEleven.Scripts
                 fila.Add(colEmpty);
 
                 // 2) Posición
-                fila.Add(CreateCell(item.Posicion.ToString(), col2, Color.black, TextAnchor.MiddleCenter));
+                fila.Add(CreateCell(item.Posicion.ToString(), col2, Color.black, TextAnchor.MiddleCenter, false));
 
                 // 3) Escudo
                 var escudo = new VisualElement();
@@ -287,17 +287,17 @@ namespace TacticalEleven.Scripts
                 fila.Add(escudo);
 
                 // 4) Nombre del equipo
-                fila.Add(CreateCell(item.NombreEquipo, col4, Color.black, TextAnchor.MiddleLeft));
+                fila.Add(CreateCell(item.NombreEquipo, col4, Color.black, TextAnchor.MiddleLeft, false));
 
                 // 5) Puntos
-                fila.Add(CreateCell(item.Puntos.ToString(), col5, Color.black, TextAnchor.MiddleCenter));
+                fila.Add(CreateCell(item.Puntos.ToString(), col5, Color.black, TextAnchor.MiddleCenter, false));
 
                 clasificacionContainer.Add(fila);
                 index++;
             }
         }
 
-        private VisualElement CreateCell(string texto, float anchoPercent, Color color, TextAnchor alineacion)
+        private VisualElement CreateCell(string texto, float anchoPercent, Color color, TextAnchor alineacion, bool esHeader)
         {
             var label = new Label(texto);
 
@@ -306,8 +306,12 @@ namespace TacticalEleven.Scripts
             label.style.unityTextAlign = alineacion;
 
             // Fuente Poppins-Bold
-            var font = Resources.Load<Font>("Fonts/Poppins-Bold");
-            label.style.unityFont = font;
+            var fontPath = esHeader
+                ? "Fonts/Poppins-SemiBold SDF"
+                : "Fonts/Poppins-Regular SDF";
+
+            var fontAsset = Resources.Load<UnityEngine.TextCore.Text.FontAsset>(fontPath);
+            label.style.unityFontDefinition = new StyleFontDefinition(fontAsset);
 
             // Flex para que no se comprima ni expanda
             label.style.display = DisplayStyle.Flex;

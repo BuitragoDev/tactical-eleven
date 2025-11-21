@@ -430,5 +430,42 @@ namespace TacticalEleven.Scripts
 
             return equipos;
         }
+
+        // -------------------------------------------------------------------------- MÉTODO QUE RESTA UNA CANTIDAD AL PRESUPUESTO
+        public static void RestarCantidadAPresupuesto(int equipo, int cantidad)
+        {
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(connString))
+                {
+                    conexion.Open();
+
+                    string query = @"UPDATE equipos SET presupuesto = presupuesto - @Cantidad WHERE id_equipo = @IdEquipo";
+
+                    using (var comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdEquipo", equipo);
+                        comando.Parameters.AddWithValue("@Cantidad", cantidad);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
     }
 }

@@ -19,9 +19,13 @@ namespace TacticalEleven.Scripts
                               estadioMenu, managerMenu, mensajesMenu;
         private VisualElement mainContainer;
         private Button btnSeguir;
-        private Label miEquipoNombre, miPresupuesto, managerNombre, fecha1, fecha2;
+        private Label miEquipoNombre, managerNombre, fecha1, fecha2;
+        public Label miPresupuesto;
         private Manager miManager;
         private Equipo miEquipo;
+
+        // Elementos Top Menu
+        private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados;
 
         void OnEnable()
         {
@@ -52,6 +56,12 @@ namespace TacticalEleven.Scripts
             mensajesIcon = root.Q<VisualElement>("mensajes-icon");
             ajustesIcon = root.Q<VisualElement>("ajustes-icon");
 
+            // Top menu elements
+            lblInformacion = root.Q<Label>("lblInformacion");
+            lblPlantilla = root.Q<Label>("lblPlantilla");
+            lblEmpleados = root.Q<Label>("lblEmpleados");
+            lblLesionados = root.Q<Label>("lblLesionados");
+
             mainContainer = root.Q<VisualElement>("main-container");
 
             // CLUB
@@ -64,6 +74,9 @@ namespace TacticalEleven.Scripts
             estadioMenu = root.Q<VisualElement>("estadioMenu");
             managerMenu = root.Q<VisualElement>("managerMenu");
             mensajesMenu = root.Q<VisualElement>("mensajesMenu");
+
+            // Listas por sección
+            List<Label> clubList = new List<Label> { lblInformacion, lblPlantilla, lblEmpleados, lblLesionados };
 
             // --- UIManager ---
             if (UIManager.Instance == null)
@@ -148,6 +161,8 @@ namespace TacticalEleven.Scripts
                                                                      calendarioMenu, fichajesMenu, finanzasMenu,
                                                                      estadioMenu, managerMenu, mensajesMenu
                                                                    };
+
+            // ---------------------------------------------------- Evento HOME ICON
             homeIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
@@ -155,12 +170,35 @@ namespace TacticalEleven.Scripts
                 CargarPortada();
             });
 
+            // ---------------------------------------------------- Eventos CLUB
             clubIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, clubMenu);
-
+                CargarClubInformacion(clubList);
             });
+            lblInformacion.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarClubInformacion(clubList);
+            });
+            lblPlantilla.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarClubPlantilla(clubList);
+            });
+            lblEmpleados.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarClubEmpleados(clubList);
+            });
+            lblLesionados.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarClubLesionados(clubList);
+            });
+
+            // ---------------------------------------------------- Eventos ALINEACION
             alineacionIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
@@ -171,6 +209,8 @@ namespace TacticalEleven.Scripts
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, competicionMenu);
             });
+
+            // ---------------------------------------------------- Evento CALENDARIO ICON
             calendarioIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
@@ -197,12 +237,16 @@ namespace TacticalEleven.Scripts
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, managerMenu);
             });
+
+            // ---------------------------------------------------- Evento MENSAJES ICON
             mensajesIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, mensajesMenu);
                 CargarMensajes();
             });
+
+            // ---------------------------------------------------- Evento AJUSTES ICON
             ajustesIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 SceneLoader.Instance.LoadScene(Constants.SETTINGS_SCREEN_SCENE);
@@ -274,6 +318,41 @@ namespace TacticalEleven.Scripts
             });
         }
 
+        private void CargarClubInformacion(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblInformacion);
+            UIManager.Instance.CargarPantalla("UI/Club/Informacion/ClubInformacion", instancia =>
+            {
+                new ClubInformacion(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarClubPlantilla(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblPlantilla);
+            UIManager.Instance.CargarPantalla("UI/Club/Plantilla/ClubPlantilla", instancia =>
+            {
+                new ClubPlantilla(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarClubEmpleados(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblEmpleados);
+            UIManager.Instance.CargarPantalla("UI/Club/Empleados/ClubEmpleados", instancia =>
+            {
+                new ClubEmpleados(instancia, miEquipo, miManager, this);
+            });
+        }
+
+        private void CargarClubLesionados(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblLesionados);
+            UIManager.Instance.CargarPantalla("UI/Club/Lesionados/ClubLesionados", instancia =>
+            {
+                new ClubLesionados(instancia, miEquipo, miManager);
+            });
+        }
 
         private void CargarCalendario()
         {
@@ -289,6 +368,21 @@ namespace TacticalEleven.Scripts
             {
                 new Mensajes(instancia, miEquipo, miManager);
             });
+        }
+
+        private void CambiarColorTextoClub(List<Label> clubList, Label label)
+        {
+            foreach (var item in clubList)
+            {
+                if (item == label)
+                {
+                    item.style.color = (Color)new Color32(0x1E, 0x72, 0x3C, 0xFF);
+                }
+                else
+                {
+                    item.style.color = Color.white;
+                }
+            }
         }
     }
 }

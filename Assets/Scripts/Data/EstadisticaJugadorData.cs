@@ -430,5 +430,82 @@ namespace TacticalEleven.Scripts
 
             return stats;
         }
+
+        // -------------------------------------------------------------- MÉTODO QUE DEVUELVE LAS ESTADÍSTICAS DE UN EQUIPO
+        public static List<Estadistica> MostrarEstadisticasEquipo(int idEquipo)
+        {
+            List<Estadistica> listaEstadistica = new List<Estadistica>();
+
+            try
+            {
+                string dbPath = DatabaseManager.GetActiveDatabasePath(); // Usa la base activa (temporal si existe)
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(connString))
+                {
+                    conexion.Open();
+
+                    // Consulta combinada: jugadores con id_jugador >= 5000 O jugadores cuyo equipo compite en Europa
+                    string query = @"SELECT 
+                                        j.id_jugador,
+                                        j.nombre,
+                                        j.apellido,
+                                        j.dorsal,
+                                        j.nacionalidad,
+                                        j.rol_id,
+                                        e.partidosJugados,
+                                        e.goles,
+                                        e.asistencias,
+                                        e.tarjetasAmarillas,
+                                        e.tarjetasRojas,
+                                        e.mvp
+                                    FROM jugadores j
+                                    LEFT JOIN estadisticas_jugadores e ON j.id_jugador = e.id_jugador
+                                    WHERE j.id_equipo = @idEquipo";
+
+                    using (var cmd = new SQLiteCommand(query, conexion))
+                    {
+                        cmd.Parameters.AddWithValue("@idEquipo", idEquipo);
+
+                        using (SQLiteDataReader reader = cmd.ExecuteReader())
+                        {
+                            listaEstadistica.Clear();  // Asegura que la lista esté vacía antes de llenarla
+
+                            while (reader.Read())
+                            {
+                                listaEstadistica.Add(new Estadistica
+                                {
+                                    IdJugador = reader.GetInt32(0),
+                                    Nombre = reader.GetString(1),
+                                    Apellido = reader.GetString(2),
+                                    Dorsal = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+                                    Nacionalidad = reader.GetString(4),
+                                    RolId = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
+                                    PartidosJugados = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
+                                    Goles = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
+                                    Asistencias = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
+                                    TarjetasAmarillas = reader.IsDBNull(9) ? 0 : reader.GetInt32(9),
+                                    TarjetasRojas = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
+                                    MVP = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
+                                });
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return listaEstadistica;
+        }
     }
 }
