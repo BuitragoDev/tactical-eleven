@@ -66,5 +66,73 @@ namespace TacticalEleven.Scripts
 
             return entrenador;
         }
+
+        // ----------------------------------------------------------- MÉTODO PARA OBTENER EL RANKING DE ENTRENADORES
+        public static List<Entrenador> ObtenerRankingEntrenadores()
+        {
+            List<Entrenador> rankingEntrenadores = new List<Entrenador>();
+
+            try
+            {
+                var dbPath = GetDBPath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"SELECT 
+                                        ROW_NUMBER() OVER (ORDER BY e.puntos DESC) AS posicion, 
+                                        e.nombre || ' ' || e.apellido AS nombre_completo, 
+                                        eq.nombre AS nombre_equipo, 
+                                        e.reputacion, 
+                                        e.puntos
+                                     FROM 
+                                        (SELECT id_entrenador, nombre, apellido, reputacion, puntos, id_equipo
+                                        FROM entrenadores
+                                        UNION
+                                        SELECT id_manager AS id_entrenador, nombre, apellido, reputacion, puntos, id_equipo
+                                        FROM managers
+                                        WHERE id_manager = @miManager) e
+                                     JOIN equipos eq ON e.id_equipo = eq.id_equipo
+                                     GROUP BY e.nombre, e.apellido, e.id_equipo
+                                     ORDER BY e.puntos DESC";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@miManager", 1);
+                        using (SQLiteDataReader reader = comando.ExecuteReader())
+                        {
+                            // Leer los resultados y añadirlos a la lista
+                            while (reader.Read())
+                            {
+                                Entrenador entrenador = new Entrenador
+                                {
+                                    Posicion = reader.GetInt32(0),
+                                    NombreCompleto = reader.GetString(1),
+                                    NombreEquipo = reader.GetString(2),
+                                    Reputacion = reader.GetInt32(3),
+                                    Puntos = reader.GetInt32(4)
+                                };
+                                rankingEntrenadores.Add(entrenador);
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return rankingEntrenadores;
+        }
     }
 }

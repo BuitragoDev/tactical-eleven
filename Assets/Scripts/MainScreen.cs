@@ -25,7 +25,7 @@ namespace TacticalEleven.Scripts
         private Equipo miEquipo;
 
         // Elementos Top Menu
-        private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados;
+        private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares;
 
         void OnEnable()
         {
@@ -61,6 +61,8 @@ namespace TacticalEleven.Scripts
             lblPlantilla = root.Q<Label>("lblPlantilla");
             lblEmpleados = root.Q<Label>("lblEmpleados");
             lblLesionados = root.Q<Label>("lblLesionados");
+            lblManagerFicha = root.Q<Label>("lblFicha");
+            lblManagerPalmares = root.Q<Label>("lblPalmaresManager");
 
             mainContainer = root.Q<VisualElement>("main-container");
 
@@ -232,10 +234,23 @@ namespace TacticalEleven.Scripts
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, estadioMenu);
             });
+
+            // ---------------------------------------------------- Eventos MÁNAGER
             managerIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, managerMenu);
+                CargarManagerFicha(clubList);
+            });
+            lblManagerFicha.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarManagerFicha(clubList);
+            });
+            lblManagerPalmares.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarManagerPalmares(clubList);
             });
 
             // ---------------------------------------------------- Evento MENSAJES ICON
@@ -359,6 +374,24 @@ namespace TacticalEleven.Scripts
             UIManager.Instance.CargarPantalla("UI/CalendarioScreen/Calendario", instancia =>
             {
                 new Calendario(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarManagerFicha(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblManagerFicha);
+            UIManager.Instance.CargarPantalla("UI/Manager/Ficha/ManagerFicha", instancia =>
+            {
+                new ManagerFicha(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarManagerPalmares(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblManagerPalmares);
+            UIManager.Instance.CargarPantalla("UI/Manager/Palmares/ManagerPalmares", instancia =>
+            {
+                new ManagerPalmares(instancia, miEquipo, miManager);
             });
         }
 
