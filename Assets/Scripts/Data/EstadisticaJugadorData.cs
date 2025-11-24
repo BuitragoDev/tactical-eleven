@@ -507,5 +507,85 @@ namespace TacticalEleven.Scripts
 
             return listaEstadistica;
         }
+
+        // -------------------------------------------------------------- MÉTODO QUE DEVUELVE LAS ESTADÍSTICAS DE UN EQUIPO
+        public static List<Estadistica> MostrarEstadisticasTotales(int filtro, int competicion)
+        {
+            var lista = new List<Estadistica>();
+
+            try
+            {
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return lista;
+                }
+
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // 1) Selección de columna para ordenar
+                string ordenColumna = filtro switch
+                {
+                    1 => "e.goles",
+                    2 => "e.asistencias",
+                    3 => "e.tarjetasAmarillas",
+                    4 => "e.tarjetasRojas",
+                    5 => "e.mvp",
+                    _ => "e.goles"
+                };
+
+                // 2) Selección de tabla según competición
+                string tablaEstadisticas = (competicion <= 2)
+                    ? "estadisticas_jugadores"
+                    : "estadisticas_jugadores_europa";
+
+                // 3) Query limpia y legible
+                string query = $@"SELECT 
+                                        j.id_jugador, j.nombre, j.apellido, j.dorsal, j.nacionalidad, j.rol_id,
+                                        e.partidosJugados, e.goles, e.asistencias, e.tarjetasAmarillas, 
+                                        e.tarjetasRojas, e.mvp,
+                                        j.id_equipo
+                                FROM jugadores j
+                                LEFT JOIN equipos eq ON eq.id_equipo = j.id_equipo
+                                LEFT JOIN {tablaEstadisticas} e ON j.id_jugador = e.id_jugador
+                                WHERE eq.id_competicion = @Comp OR eq.competicion_europea = @Comp
+                                ORDER BY {ordenColumna} DESC
+                                LIMIT 25";
+
+                using var cmd = new SQLiteCommand(query, conexion);
+                cmd.Parameters.AddWithValue("@Comp", competicion);
+
+                using var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    lista.Add(new Estadistica
+                    {
+                        IdJugador = reader.GetInt32(0),
+                        Nombre = reader.GetString(1),
+                        Apellido = reader.GetString(2),
+                        Dorsal = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+                        Nacionalidad = reader.GetString(4),
+                        RolId = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
+                        PartidosJugados = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
+                        Goles = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
+                        Asistencias = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
+                        TarjetasAmarillas = reader.IsDBNull(9) ? 0 : reader.GetInt32(9),
+                        TarjetasRojas = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
+                        MVP = reader.IsDBNull(11) ? 0 : reader.GetInt32(11),   // ← Corregido
+                        IdEquipo = reader.GetInt32(12)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al leer estadísticas: {ex.Message}");
+            }
+
+            return lista;
+        }
     }
 }

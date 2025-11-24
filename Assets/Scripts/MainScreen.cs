@@ -25,7 +25,8 @@ namespace TacticalEleven.Scripts
         private Equipo miEquipo;
 
         // Elementos Top Menu
-        private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares;
+        private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares,
+                      lblClasificacion, lblResultados, lblEstadisticas, lblPalmaresEquipos, lblPalmaresJugadores;
 
         void OnEnable()
         {
@@ -63,6 +64,11 @@ namespace TacticalEleven.Scripts
             lblLesionados = root.Q<Label>("lblLesionados");
             lblManagerFicha = root.Q<Label>("lblFicha");
             lblManagerPalmares = root.Q<Label>("lblPalmaresManager");
+            lblClasificacion = root.Q<Label>("lblClasificacion");
+            lblResultados = root.Q<Label>("lblResultados");
+            lblEstadisticas = root.Q<Label>("lblEstadisticas");
+            lblPalmaresEquipos = root.Q<Label>("lblPalmaresE");
+            lblPalmaresJugadores = root.Q<Label>("lblPalmaresJ");
 
             mainContainer = root.Q<VisualElement>("main-container");
 
@@ -78,7 +84,8 @@ namespace TacticalEleven.Scripts
             mensajesMenu = root.Q<VisualElement>("mensajesMenu");
 
             // Listas por sección
-            List<Label> clubList = new List<Label> { lblInformacion, lblPlantilla, lblEmpleados, lblLesionados };
+            List<Label> clubList = new List<Label> { lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblClasificacion, lblResultados,
+                                                     lblEstadisticas, lblPalmaresJugadores, lblPalmaresEquipos };
 
             // --- UIManager ---
             if (UIManager.Instance == null)
@@ -206,10 +213,38 @@ namespace TacticalEleven.Scripts
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, alineacionMenu);
             });
+
+            // ---------------------------------------------------- Eventos COMPETICIONES
             competicionesIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, competicionMenu);
+                CargarCompeticionesClasificacion(clubList);
+            });
+            lblClasificacion.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarCompeticionesClasificacion(clubList);
+            });
+            lblEstadisticas.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarCompeticionesEstadisticas(clubList);
+            });
+            lblPalmaresEquipos.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarCompeticionesPalmaresEquipos(clubList);
+            });
+            lblPalmaresJugadores.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarCompeticionesPalmaresJugadores(clubList);
+            });
+            lblResultados.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarCompeticionesResultados(clubList);
             });
 
             // ---------------------------------------------------- Evento CALENDARIO ICON
@@ -366,6 +401,51 @@ namespace TacticalEleven.Scripts
             UIManager.Instance.CargarPantalla("UI/Club/Lesionados/ClubLesionados", instancia =>
             {
                 new ClubLesionados(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarCompeticionesClasificacion(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblClasificacion);
+            UIManager.Instance.CargarPantalla("UI/Competiciones/Clasificacion/CompeticionesClasificacion", instancia =>
+            {
+                new CompeticionesClasificacion(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarCompeticionesEstadisticas(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblEstadisticas);
+            UIManager.Instance.CargarPantalla("UI/Competiciones/Estadisticas/CompeticionesEstadisticas", instancia =>
+            {
+                new CompeticionesEstadisticas(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarCompeticionesPalmaresEquipos(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblPalmaresEquipos);
+            UIManager.Instance.CargarPantalla("UI/Competiciones/PalmaresEquipos/CompeticionesPalmaresEquipos", instancia =>
+            {
+                new CompeticionesPalmaresEquipos(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarCompeticionesPalmaresJugadores(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblPalmaresJugadores);
+            UIManager.Instance.CargarPantalla("UI/Competiciones/PalmaresJugadores/CompeticionesPalmaresJugadores", instancia =>
+            {
+                new CompeticionesPalmaresJugadores(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarCompeticionesResultados(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblResultados);
+            UIManager.Instance.CargarPantalla("UI/Competiciones/Resultados/CompeticionesResultados", instancia =>
+            {
+                new CompeticionesResultados(instancia, miEquipo, miManager);
             });
         }
 

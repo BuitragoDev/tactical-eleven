@@ -138,7 +138,7 @@ namespace TacticalEleven.Scripts
             cell.style.flexDirection = FlexDirection.Row;
             cell.style.alignItems = Align.Center;
 
-            // 🔥 Ajustar el positionamiento horizontal según el alineado del texto
+            // Ajustar el positionamiento horizontal según el alineado del texto
             if (alineacion == TextAnchor.MiddleLeft)
                 cell.style.justifyContent = Justify.FlexStart;
             else if (alineacion == TextAnchor.MiddleCenter)

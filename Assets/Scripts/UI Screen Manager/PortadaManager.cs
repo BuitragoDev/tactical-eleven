@@ -277,7 +277,7 @@ namespace TacticalEleven.Scripts
                 // 3) Escudo
                 var escudo = new VisualElement();
                 escudo.style.width = Length.Percent(col3);
-                escudo.style.height = 30;
+                escudo.style.height = 32;
                 var sprite = Resources.Load<Sprite>($"EscudosEquipos/32x32/{item.IdEquipo}");
                 if (sprite != null)
                 {

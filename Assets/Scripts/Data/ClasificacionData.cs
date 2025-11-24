@@ -383,6 +383,10 @@ namespace TacticalEleven.Scripts
                 tablaClasificacion = "clasificacion";
             else if (competicion == 2)
                 tablaClasificacion = "clasificacion2";
+            else if (competicion == 5)
+                tablaClasificacion = "clasificacion_europa1";
+            else if (competicion == 6)
+                tablaClasificacion = "clasificacion_europa2";
             else
                 throw new ArgumentException("Competición no válida");
 
@@ -414,10 +418,7 @@ namespace TacticalEleven.Scripts
                                                e.nombre AS NombreEquipo
                                         FROM {tablaClasificacion} c
                                         INNER JOIN equipos e ON c.id_equipo = e.id_equipo
-                                        WHERE e.id_competicion = @competicion
                                         ORDER BY c.puntos DESC, (c.goles_favor - c.goles_contra) DESC";
-
-                comando.Parameters.AddWithValue("@competicion", competicion);
 
                 using (SQLiteDataReader reader = comando.ExecuteReader())
                 {
@@ -451,6 +452,387 @@ namespace TacticalEleven.Scripts
             }
 
             return clasificaciones;
+        }
+
+        // --------------------------------------------------------------------- MÉTODO PARA MOSTRAR EL EQUIPO CON MÁS GOLES A FAVOR
+        public static Clasificacion MostrarMejorAtaque(int competicion)
+        {
+            var dbPath = GetDBPath();
+            if (!File.Exists(dbPath))
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // Elegimos la tabla según la competición
+                string tabla = competicion switch
+                {
+                    1 => "clasificacion",
+                    5 => "clasificacion_europa1",
+                    6 => "clasificacion_europa2",
+                    _ => "clasificacion2"
+                };
+
+                string query = $@"SELECT 
+                                    c.id_equipo AS IdEquipo,
+                                    c.jugados AS Jugados,
+                                    c.ganados AS Ganados,
+                                    c.empatados AS Empatados,
+                                    c.perdidos AS Perdidos,
+                                    c.puntos AS Puntos,
+                                    c.local_victorias AS LocalVictorias,
+                                    c.local_derrotas AS LocalDerrotas,
+                                    c.visitante_victorias AS VisitanteVictorias,
+                                    c.visitante_derrotas AS VisitanteDerrotas,
+                                    c.goles_favor AS PuntosFavor,
+                                    c.goles_contra AS PuntosContra,
+                                    c.racha AS Racha,
+                                    e.nombre AS NombreEquipo
+                                FROM {tabla} c
+                                INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                ORDER BY c.goles_favor DESC
+                                LIMIT 1";
+
+                using var comando = new SQLiteCommand(query, conexion);
+
+                using SQLiteDataReader reader = comando.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Clasificacion
+                    {
+                        IdEquipo = reader.GetInt32(0),
+                        Jugados = reader.GetInt32(1),
+                        Ganados = reader.GetInt32(2),
+                        Empatados = reader.GetInt32(3),
+                        Perdidos = reader.GetInt32(4),
+                        Puntos = reader.GetInt32(5),
+                        LocalVictorias = reader.GetInt32(6),
+                        LocalDerrotas = reader.GetInt32(7),
+                        VisitanteVictorias = reader.GetInt32(8),
+                        VisitanteDerrotas = reader.GetInt32(9),
+                        GolesFavor = reader.GetInt32(10),
+                        GolesContra = reader.GetInt32(11),
+                        Racha = reader.GetInt32(12),
+                        NombreEquipo = reader.GetString(13)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al obtener mejor ataque: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        // --------------------------------------------------------------------- MÉTODO PARA MOSTRAR EL EQUIPO CON MENOS GOLES EN CONTRA
+        public static Clasificacion MostrarMejorDefensa(int competicion)
+        {
+            var dbPath = GetDBPath();
+            Clasificacion clasificacionEquipo = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // Elegimos la tabla según la competición
+                string tabla = competicion switch
+                {
+                    1 => "clasificacion",
+                    5 => "clasificacion_europa1",
+                    6 => "clasificacion_europa2",
+                    _ => "clasificacion2"
+                };
+
+                string query = $@"SELECT 
+                                    c.id_equipo AS IdEquipo,
+                                    c.jugados AS Jugados,
+                                    c.ganados AS Ganados,
+                                    c.empatados AS Empatados,
+                                    c.perdidos AS Perdidos,
+                                    c.puntos AS Puntos,
+                                    c.local_victorias AS LocalVictorias,
+                                    c.local_derrotas AS LocalDerrotas,
+                                    c.visitante_victorias AS VisitanteVictorias,
+                                    c.visitante_derrotas AS VisitanteDerrotas,
+                                    c.goles_favor AS PuntosFavor,
+                                    c.goles_contra AS PuntosContra,
+                                    c.racha AS Racha,
+                                    e.nombre AS NombreEquipo
+                                FROM {tabla} c
+                                INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                ORDER BY c.goles_contra ASC
+                                LIMIT 1";
+
+                using var comando = new SQLiteCommand(query, conexion);
+
+                using SQLiteDataReader reader = comando.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Clasificacion
+                    {
+                        IdEquipo = reader.GetInt32(0),
+                        Jugados = reader.GetInt32(1),
+                        Ganados = reader.GetInt32(2),
+                        Empatados = reader.GetInt32(3),
+                        Perdidos = reader.GetInt32(4),
+                        Puntos = reader.GetInt32(5),
+                        LocalVictorias = reader.GetInt32(6),
+                        LocalDerrotas = reader.GetInt32(7),
+                        VisitanteVictorias = reader.GetInt32(8),
+                        VisitanteDerrotas = reader.GetInt32(9),
+                        GolesFavor = reader.GetInt32(10),
+                        GolesContra = reader.GetInt32(11),
+                        Racha = reader.GetInt32(12),
+                        NombreEquipo = reader.GetString(13)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al crear el partido: {ex.Message}");
+            }
+
+            return clasificacionEquipo;
+        }
+
+        // --------------------------------------------------------------------- MÉTODO PARA MOSTRAR EL EQUIPO CON MEJOR RACHA
+        public static Clasificacion MostrarMejorRacha(int competicion)
+        {
+            var dbPath = GetDBPath();
+            Clasificacion clasificacionEquipo = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // Elegimos la tabla según la competición
+                string tabla = competicion switch
+                {
+                    1 => "clasificacion",
+                    5 => "clasificacion_europa1",
+                    6 => "clasificacion_europa2",
+                    _ => "clasificacion2"
+                };
+
+                string query = $@"SELECT 
+                                    c.id_equipo AS IdEquipo,
+                                    c.jugados AS Jugados,
+                                    c.ganados AS Ganados,
+                                    c.empatados AS Empatados,
+                                    c.perdidos AS Perdidos,
+                                    c.puntos AS Puntos,
+                                    c.local_victorias AS LocalVictorias,
+                                    c.local_derrotas AS LocalDerrotas,
+                                    c.visitante_victorias AS VisitanteVictorias,
+                                    c.visitante_derrotas AS VisitanteDerrotas,
+                                    c.goles_favor AS PuntosFavor,
+                                    c.goles_contra AS PuntosContra,
+                                    c.racha AS Racha,
+                                    e.nombre AS NombreEquipo
+                                FROM {tabla} c
+                                INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                ORDER BY c.racha DESC
+                                LIMIT 1";
+
+                using var comando = new SQLiteCommand(query, conexion);
+
+                using SQLiteDataReader reader = comando.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Clasificacion
+                    {
+                        IdEquipo = reader.GetInt32(0),
+                        Jugados = reader.GetInt32(1),
+                        Ganados = reader.GetInt32(2),
+                        Empatados = reader.GetInt32(3),
+                        Perdidos = reader.GetInt32(4),
+                        Puntos = reader.GetInt32(5),
+                        LocalVictorias = reader.GetInt32(6),
+                        LocalDerrotas = reader.GetInt32(7),
+                        VisitanteVictorias = reader.GetInt32(8),
+                        VisitanteDerrotas = reader.GetInt32(9),
+                        GolesFavor = reader.GetInt32(10),
+                        GolesContra = reader.GetInt32(11),
+                        Racha = reader.GetInt32(12),
+                        NombreEquipo = reader.GetString(13)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al crear el partido: {ex.Message}");
+            }
+
+            return clasificacionEquipo;
+        }
+
+        // --------------------------------------------------------- MÉTODO PARA MOSTRAR EL EQUIPO CON MÁS VICTORIAS COMO LOCAL
+        public static Clasificacion MostrarMejorEquipoLocal(int competicion)
+        {
+            var dbPath = GetDBPath();
+            Clasificacion clasificacionEquipo = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // Elegimos la tabla según la competición
+                string tabla = competicion switch
+                {
+                    1 => "clasificacion",
+                    5 => "clasificacion_europa1",
+                    6 => "clasificacion_europa2",
+                    _ => "clasificacion2"
+                };
+
+                string query = $@"SELECT 
+                                    c.id_equipo AS IdEquipo,
+                                    c.jugados AS Jugados,
+                                    c.ganados AS Ganados,
+                                    c.empatados AS Empatados,
+                                    c.perdidos AS Perdidos,
+                                    c.puntos AS Puntos,
+                                    c.local_victorias AS LocalVictorias,
+                                    c.local_derrotas AS LocalDerrotas,
+                                    c.visitante_victorias AS VisitanteVictorias,
+                                    c.visitante_derrotas AS VisitanteDerrotas,
+                                    c.goles_favor AS PuntosFavor,
+                                    c.goles_contra AS PuntosContra,
+                                    c.racha AS Racha,
+                                    e.nombre AS NombreEquipo
+                                FROM {tabla} c
+                                INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                ORDER BY c.local_victorias DESC
+                                LIMIT 1";
+
+                using var comando = new SQLiteCommand(query, conexion);
+
+                using SQLiteDataReader reader = comando.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Clasificacion
+                    {
+                        IdEquipo = reader.GetInt32(0),
+                        Jugados = reader.GetInt32(1),
+                        Ganados = reader.GetInt32(2),
+                        Empatados = reader.GetInt32(3),
+                        Perdidos = reader.GetInt32(4),
+                        Puntos = reader.GetInt32(5),
+                        LocalVictorias = reader.GetInt32(6),
+                        LocalDerrotas = reader.GetInt32(7),
+                        VisitanteVictorias = reader.GetInt32(8),
+                        VisitanteDerrotas = reader.GetInt32(9),
+                        GolesFavor = reader.GetInt32(10),
+                        GolesContra = reader.GetInt32(11),
+                        Racha = reader.GetInt32(12),
+                        NombreEquipo = reader.GetString(13)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al crear el partido: {ex.Message}");
+            }
+
+            return clasificacionEquipo;
+        }
+
+        // --------------------------------------------------------- MÉTODO PARA MOSTRAR EL EQUIPO CON MÁS VICTORIAS COMO VISITANTE
+        public static Clasificacion MostrarMejorEquipoVisitante(int competicion)
+        {
+            var dbPath = GetDBPath();
+            Clasificacion clasificacionEquipo = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // Elegimos la tabla según la competición
+                string tabla = competicion switch
+                {
+                    1 => "clasificacion",
+                    5 => "clasificacion_europa1",
+                    6 => "clasificacion_europa2",
+                    _ => "clasificacion2"
+                };
+
+                string query = $@"SELECT 
+                                    c.id_equipo AS IdEquipo,
+                                    c.jugados AS Jugados,
+                                    c.ganados AS Ganados,
+                                    c.empatados AS Empatados,
+                                    c.perdidos AS Perdidos,
+                                    c.puntos AS Puntos,
+                                    c.local_victorias AS LocalVictorias,
+                                    c.local_derrotas AS LocalDerrotas,
+                                    c.visitante_victorias AS VisitanteVictorias,
+                                    c.visitante_derrotas AS VisitanteDerrotas,
+                                    c.goles_favor AS PuntosFavor,
+                                    c.goles_contra AS PuntosContra,
+                                    c.racha AS Racha,
+                                    e.nombre AS NombreEquipo
+                                FROM {tabla} c
+                                INNER JOIN equipos e ON c.id_equipo = e.id_equipo
+                                ORDER BY c.visitante_victorias DESC
+                                LIMIT 1";
+
+                using var comando = new SQLiteCommand(query, conexion);
+
+                using SQLiteDataReader reader = comando.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Clasificacion
+                    {
+                        IdEquipo = reader.GetInt32(0),
+                        Jugados = reader.GetInt32(1),
+                        Ganados = reader.GetInt32(2),
+                        Empatados = reader.GetInt32(3),
+                        Perdidos = reader.GetInt32(4),
+                        Puntos = reader.GetInt32(5),
+                        LocalVictorias = reader.GetInt32(6),
+                        LocalDerrotas = reader.GetInt32(7),
+                        VisitanteVictorias = reader.GetInt32(8),
+                        VisitanteDerrotas = reader.GetInt32(9),
+                        GolesFavor = reader.GetInt32(10),
+                        GolesContra = reader.GetInt32(11),
+                        Racha = reader.GetInt32(12),
+                        NombreEquipo = reader.GetString(13)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al crear el partido: {ex.Message}");
+            }
+
+            return clasificacionEquipo;
         }
     }
 }

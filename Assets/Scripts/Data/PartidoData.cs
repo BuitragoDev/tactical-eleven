@@ -1115,5 +1115,297 @@ namespace TacticalEleven.Scripts
 
             return partidos;
         }
+
+        // ------------------------------------------------------------------------ MÉTODO QUE DEVUELVE LA ÚLTIMA JORNADA DE LIGA JUGADA
+        public static int ObtenerUltimaJornadaJugada(int equipo, int competicion)
+        {
+            var dbPath = GetDBPath();
+            int ultimaJornada = 0;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return -1;
+            }
+
+            // Según la competición, determinamos tabla, campo y si tiene filtro por equipo
+            string tabla = "";
+            string campo = "";
+            bool filtrarPorEquipo = false;
+
+            switch (competicion)
+            {
+                case 1: // Liga 1
+                case 2: // Liga 2
+                    tabla = "partidos";
+                    campo = "jornada";
+                    filtrarPorEquipo = true;
+                    break;
+
+                case 4: // Copa Nacional
+                    tabla = "partidos_copaNacional";
+                    campo = "id_ronda";
+                    filtrarPorEquipo = false;
+                    break;
+
+                case 5: // Copa Europa 1
+                    tabla = "partidos_copaEuropa1";
+                    campo = "jornada";
+                    filtrarPorEquipo = false;
+                    break;
+
+                case 6: // Copa Europa 2
+                    tabla = "partidos_copaEuropa2";
+                    campo = "jornada";
+                    filtrarPorEquipo = false;
+                    break;
+
+                default:
+                    Debug.LogError("Competición desconocida en ObtenerUltimaJornadaJugada: " + competicion);
+                    return -1;
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                using var comando = conexion.CreateCommand();
+
+                // QUERY dinámica según si filtra por equipo o no
+                if (filtrarPorEquipo)
+                {
+                    comando.CommandText = $@"SELECT MAX({campo})
+                                            FROM {tabla}
+                                            WHERE (id_equipo_local = @IdEquipo OR id_equipo_visitante = @IdEquipo)
+                                            AND estado != 'Pendiente'";
+                    comando.Parameters.AddWithValue("@IdEquipo", equipo);
+                }
+                else
+                {
+                    comando.CommandText = $@"SELECT MAX({campo})
+                                            FROM {tabla}
+                                            WHERE estado != 'Pendiente'";
+                }
+
+                object result = comando.ExecuteScalar();
+
+                if (result != DBNull.Value && result != null)
+                    ultimaJornada = Convert.ToInt32(result);
+                else
+                    ultimaJornada = 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al obtener última jornada: {ex.Message}");
+                return -1;
+            }
+
+            return ultimaJornada;
+        }
+
+
+        // ----------------------------------------------------------------- METODO QUE CARGA LOS PARTIDOS DE UNA JORNADA
+        public static List<Partido> CargarPartidos(string tabla, Dictionary<string, object> filtros)
+        {
+            var dbPath = GetDBPath();
+            List<Partido> partidos = new List<Partido>();
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            try
+            {
+                using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+                {
+                    conexion.Open();
+
+                    using (var comando = conexion.CreateCommand())
+                    {
+                        // Construcción dinámica del WHERE
+                        string where = string.Join(" AND ", filtros.Keys.Select(k => $"{k} = @{k}"));
+
+                        comando.CommandText = $@"SELECT fecha, jornada, id_ronda, partido_vuelta,
+                                                    id_equipo_local, id_equipo_visitante,
+                                                    goles_local, goles_visitante, estado, id_competicion
+                                                FROM {tabla}
+                                                WHERE {where}";
+
+                        // Añadir parámetros
+                        foreach (var par in filtros)
+                            comando.Parameters.AddWithValue("@" + par.Key, par.Value);
+
+                        using (SQLiteDataReader reader = comando.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                partidos.Add(new Partido()
+                                {
+                                    FechaPartido = DateTime.Parse(reader["fecha"]?.ToString() ?? "2000-01-01"),
+                                    IdEquipoLocal = Convert.ToInt32(reader["id_equipo_local"]),
+                                    IdEquipoVisitante = Convert.ToInt32(reader["id_equipo_visitante"]),
+                                    Estado = reader.GetString(reader.GetOrdinal("estado")),
+                                    GolesLocal = reader["goles_local"] != DBNull.Value ? Convert.ToInt32(reader["goles_local"]) : 0,
+                                    GolesVisitante = reader["goles_visitante"] != DBNull.Value ? Convert.ToInt32(reader["goles_visitante"]) : 0,
+                                    IdCompeticion = reader["id_competicion"] != DBNull.Value ? Convert.ToInt32(reader["id_competicion"]) : 0,
+                                    Jornada = reader["jornada"] != DBNull.Value ? Convert.ToInt32(reader["jornada"]) : 0,
+                                    Ronda = reader["id_ronda"] != DBNull.Value ? Convert.ToInt32(reader["id_ronda"]) : 0,
+                                    PartidoVuelta = reader["partido_vuelta"] != DBNull.Value ? Convert.ToInt32(reader["partido_vuelta"]) : 0
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al cargar partidos: {ex.Message}");
+                return null;
+            }
+
+            return partidos;
+        }
+
+        public static List<Partido> CargarPartidosPorCompeticion(int numero, int competicion, int ronda, int vuelta)
+        {
+            if (!config.ContainsKey(competicion))
+            {
+                Debug.LogError("Competición no reconocida.");
+                return new List<Partido>();
+            }
+
+            var (tabla, filtro, usaVuelta) = config[competicion];
+            string dbPath = GetDBPath();
+
+            List<Partido> lista = new List<Partido>();
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return lista;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+
+                using var comando = conexion.CreateCommand();
+
+                if (competicion == 4)
+                {
+                    comando.CommandText =
+                        $@"SELECT fecha, id_ronda, partido_vuelta, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, estado, id_competicion
+                                     FROM partidos_copaNacional
+                                     WHERE id_ronda = @Ronda AND partido_vuelta = @Vuelta AND id_competicion = @IdCompeticion";
+
+                    comando.Parameters.AddWithValue("@Ronda", ronda);
+                    comando.Parameters.AddWithValue("@Vuelta", vuelta);
+                    comando.Parameters.AddWithValue("@IdCompeticion", competicion);
+                }
+                else
+                {
+                    // --- Construcción dinámica de la query ---
+                    string select = "fecha, id_equipo_local, id_equipo_visitante, goles_local, goles_visitante, estado, id_competicion";
+
+                    if (tabla != "partidos")
+                    {
+                        select += ", id_ronda, partido_vuelta";
+                    }
+                    else
+                    {
+                        select += ", jornada";
+                    }
+
+                    comando.CommandText =
+                        $"SELECT {select} FROM {tabla} WHERE {filtro} = @Num AND id_competicion = @Comp";
+
+                    comando.Parameters.AddWithValue("@Num", numero);
+                    comando.Parameters.AddWithValue("@Comp", competicion);
+                }
+
+
+
+                using (SQLiteDataReader reader = comando.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Partido p = new Partido()
+                        {
+                            FechaPartido = DateTime.Parse(reader["fecha"]?.ToString() ?? "2000-01-01"),
+                            IdEquipoLocal = Convert.ToInt32(reader["id_equipo_local"]),
+                            IdEquipoVisitante = Convert.ToInt32(reader["id_equipo_visitante"]),
+                            Estado = reader.GetString(reader.GetOrdinal("estado")),
+                            GolesLocal = reader["goles_local"] != DBNull.Value ? Convert.ToInt32(reader["goles_local"]) : 0,
+                            GolesVisitante = reader["goles_visitante"] != DBNull.Value ? Convert.ToInt32(reader["goles_visitante"]) : 0,
+                            IdCompeticion = Convert.ToInt32(reader["id_competicion"])
+                        };
+
+                        if (tabla != "partidos")
+                        {
+                            p.Ronda = Convert.ToInt32(reader["id_ronda"]);
+                            p.PartidoVuelta = Convert.ToInt32(reader["partido_vuelta"]);
+                        }
+                        else
+                        {
+                            p.Jornada = numero;
+                        }
+
+                        lista.Add(p);
+                    }
+                }
+            }
+
+            return lista;
+        }
+
+        private static readonly Dictionary<int, (string tabla, string filtro, bool usaVuelta)> config =
+            new Dictionary<int, (string, string, bool)>
+            {
+                { 1, ("partidos", "jornada", false) },                    // Liga 1
+                { 2, ("partidos", "jornada", false) },                    // Liga 2
+                { 4, ("partidos_copaNacional", "id_ronda", true) },       // Copa Nacional
+                { 5, ("partidos_copaEuropa1", "jornada", true) },         // Europa 1
+                { 6, ("partidos_copaEuropa2", "jornada", true) },         // Europa 2
+            };
+
+        // ------------------------------------------------------------------------ MÉTODO PARA OBTENER EL NOMBRE DE UNA RONDA DE COPA
+        public static string ObtenerNombreRonda(int idRonda)
+        {
+            var dbPath = GetDBPath();
+            string nombre = "";
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+            }
+
+            try
+            {
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                using var comando = conexion.CreateCommand();
+
+                comando.CommandText = @"SELECT nombre FROM rondas_copaNacional WHERE id_ronda = @idRonda";
+                comando.Parameters.AddWithValue("@idRonda", idRonda);
+
+                using (SQLiteDataReader reader = comando.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        nombre = reader["nombre"].ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al obtener el nombre de la ronda: {ex.Message}");
+            }
+
+            return nombre;
+        }
     }
 }
