@@ -881,6 +881,28 @@ namespace TacticalEleven.Scripts
                                                 WHERE 
                                                     (pe1.id_equipo_local = @IdEquipo OR pe1.id_equipo_visitante = @IdEquipo)
                                                     AND DATE(pe1.fecha) >= DATE(@Hoy)
+
+                                            UNION ALL
+
+                                                SELECT 
+                                                    pe2.id_partido,
+                                                    pe2.fecha, 
+                                                    pe2.jornada,
+                                                    pe2.id_ronda,
+                                                    pe2.partido_vuelta, 
+                                                    el.nombre AS nombreEquipoLocal, 
+                                                    ev.nombre AS nombreEquipoVisitante, 
+                                                    pe2.id_equipo_local, 
+                                                    pe2.id_equipo_visitante,
+                                                    pe2.goles_local,
+                                                    pe2.goles_visitante,
+                                                    pe2.id_competicion
+                                                FROM partidos_copaEuropa2 pe2
+                                                JOIN equipos el ON pe2.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON pe2.id_equipo_visitante = ev.id_equipo
+                                                WHERE 
+                                                    (pe2.id_equipo_local = @IdEquipo OR pe2.id_equipo_visitante = @IdEquipo)
+                                                    AND DATE(pe2.fecha) >= DATE(@Hoy)
                                         )
                                         ORDER BY fecha ASC
                                         LIMIT 1";
@@ -1406,6 +1428,135 @@ namespace TacticalEleven.Scripts
             }
 
             return nombre;
+        }
+
+        // ------------------------------------------------------------------ METODO QUE DEVUELVE EL PRÓXIMO PARTIDO DE MI EQUIPO
+        public static Partido MostrarProximoPartidoLocal(int equipo, Fecha hoy)
+        {
+            var dbPath = GetDBPath();
+
+            Partido partido = null;
+
+            if (!File.Exists(dbPath))
+            {
+                Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                return null;
+            }
+
+            using (var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;"))
+            {
+                conexion.Open();
+                using (var comando = conexion.CreateCommand())
+                {
+                    comando.CommandText = @"SELECT * FROM (
+                                                SELECT 
+                                                    p.id_partido,
+                                                    p.id_equipo_local,
+                                                    p.id_equipo_visitante,
+                                                    p.fecha,
+                                                    p.goles_local,
+                                                    p.goles_visitante,
+                                                    p.id_competicion,
+                                                    p.jornada,
+                                                    NULL AS id_ronda,
+                                                    el.nombre AS nombre_local, 
+                                                    ev.nombre AS nombre_visitante 
+                                                FROM partidos p
+                                                JOIN equipos el ON p.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON p.id_equipo_visitante = ev.id_equipo
+                                                WHERE p.id_equipo_local = @IdEquipo 
+                                                AND p.fecha > @Fecha
+
+                                                UNION ALL
+
+                                                SELECT 
+                                                    pc.id_partido,
+                                                    pc.id_equipo_local,
+                                                    pc.id_equipo_visitante,
+                                                    pc.fecha,
+                                                    pc.goles_local,
+                                                    pc.goles_visitante,
+                                                    pc.id_competicion,
+                                                    NULL AS jornada,
+                                                    pc.id_ronda,
+                                                    el.nombre AS nombre_local, 
+                                                    ev.nombre AS nombre_visitante 
+                                                FROM partidos_copaNacional pc
+                                                JOIN equipos el ON pc.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON pc.id_equipo_visitante = ev.id_equipo
+                                                WHERE pc.id_equipo_local = @IdEquipo 
+                                                AND pc.fecha > @Fecha
+
+                                                UNION ALL
+
+                                                SELECT 
+                                                    pe1.id_partido,
+                                                    pe1.id_equipo_local,
+                                                    pe1.id_equipo_visitante,
+                                                    pe1.fecha,
+                                                    pe1.goles_local,
+                                                    pe1.goles_visitante,
+                                                    pe1.id_competicion,
+                                                    NULL AS jornada,
+                                                    pe1.id_ronda,
+                                                    el.nombre AS nombre_local, 
+                                                    ev.nombre AS nombre_visitante 
+                                                FROM partidos_copaEuropa1 pe1
+                                                JOIN equipos el ON pe1.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON pe1.id_equipo_visitante = ev.id_equipo
+                                                WHERE pe1.id_equipo_local = @IdEquipo 
+                                                AND pe1.fecha > @Fecha
+
+                                                UNION ALL
+
+                                                SELECT 
+                                                    pe2.id_partido,
+                                                    pe2.id_equipo_local,
+                                                    pe2.id_equipo_visitante,
+                                                    pe2.fecha,
+                                                    pe2.goles_local,
+                                                    pe2.goles_visitante,
+                                                    pe2.id_competicion,
+                                                    NULL AS jornada,
+                                                    pe2.id_ronda,
+                                                    el.nombre AS nombre_local, 
+                                                    ev.nombre AS nombre_visitante 
+                                                FROM partidos_copaEuropa2 pe2
+                                                JOIN equipos el ON pe2.id_equipo_local = el.id_equipo
+                                                JOIN equipos ev ON pe2.id_equipo_visitante = ev.id_equipo
+                                                WHERE pe2.id_equipo_local = @IdEquipo 
+                                                AND pe2.fecha > @Fecha
+                                            )
+                                            ORDER BY fecha ASC
+                                            LIMIT 1";
+
+                    comando.Parameters.AddWithValue("@IdEquipo", equipo);
+                    DateTime fechaHoy = DateTime.Parse(hoy.Hoy);
+                    comando.Parameters.AddWithValue("@Fecha", fechaHoy);
+
+                    using (SQLiteDataReader reader = comando.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            partido = new Partido
+                            {
+                                FechaPartido = DateTime.Parse(reader["fecha"]?.ToString() ?? "2000-01-01"),
+                                IdEquipoLocal = Convert.ToInt32(reader["id_equipo_local"]),
+                                IdEquipoVisitante = Convert.ToInt32(reader["id_equipo_visitante"]),
+                                GolesLocal = reader["goles_local"] != DBNull.Value ? Convert.ToInt32(reader["goles_local"]) : 0,
+                                GolesVisitante = reader["goles_visitante"] != DBNull.Value ? Convert.ToInt32(reader["goles_visitante"]) : 0,
+                                IdCompeticion = reader["id_competicion"] != DBNull.Value ? Convert.ToInt32(reader["id_competicion"]) : 0,
+                                Jornada = reader["jornada"] != DBNull.Value ? Convert.ToInt32(reader["jornada"]) : 0,
+                                NombreEquipoLocal = reader["nombre_local"]?.ToString() ?? "",
+                                NombreEquipoVisitante = reader["nombre_visitante"]?.ToString() ?? "",
+                                Ronda = reader["id_ronda"] != DBNull.Value ? Convert.ToInt32(reader["id_ronda"]) : 0
+                            };
+                        }
+                    }
+                }
+            }
+
+            return partido;
         }
     }
 }

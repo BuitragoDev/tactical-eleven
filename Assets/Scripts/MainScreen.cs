@@ -26,7 +26,8 @@ namespace TacticalEleven.Scripts
 
         // Elementos Top Menu
         private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares,
-                      lblClasificacion, lblResultados, lblEstadisticas, lblPalmaresEquipos, lblPalmaresJugadores;
+                      lblClasificacion, lblResultados, lblEstadisticas, lblPalmaresEquipos, lblPalmaresJugadores,
+                      lblEstadioInformacion, lblEntradas, lblAmpliaciones;
 
         void OnEnable()
         {
@@ -69,6 +70,9 @@ namespace TacticalEleven.Scripts
             lblEstadisticas = root.Q<Label>("lblEstadisticas");
             lblPalmaresEquipos = root.Q<Label>("lblPalmaresE");
             lblPalmaresJugadores = root.Q<Label>("lblPalmaresJ");
+            lblEstadioInformacion = root.Q<Label>("lblInformacionEstadio");
+            lblEntradas = root.Q<Label>("lblEntradas");
+            lblAmpliaciones = root.Q<Label>("lblAmpliaciones");
 
             mainContainer = root.Q<VisualElement>("main-container");
 
@@ -85,7 +89,8 @@ namespace TacticalEleven.Scripts
 
             // Listas por sección
             List<Label> clubList = new List<Label> { lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblClasificacion, lblResultados,
-                                                     lblEstadisticas, lblPalmaresJugadores, lblPalmaresEquipos };
+                                                     lblEstadisticas, lblPalmaresJugadores, lblPalmaresEquipos, lblEstadioInformacion, lblEntradas,
+                                                     lblAmpliaciones };
 
             // --- UIManager ---
             if (UIManager.Instance == null)
@@ -264,10 +269,28 @@ namespace TacticalEleven.Scripts
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, finanzasMenu);
             });
+
+            // ---------------------------------------------------- Eventos ESTADIO
             estadioIcon.RegisterCallback<ClickEvent>(evt =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, estadioMenu);
+                CargarEstadioInformacion(clubList);
+            });
+            lblEstadioInformacion.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarEstadioInformacion(clubList);
+            });
+            lblEntradas.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarEstadioEntradas(clubList);
+            });
+            lblAmpliaciones.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarEstadioAmpliaciones(clubList);
             });
 
             // ---------------------------------------------------- Eventos MÁNAGER
@@ -454,6 +477,33 @@ namespace TacticalEleven.Scripts
             UIManager.Instance.CargarPantalla("UI/CalendarioScreen/Calendario", instancia =>
             {
                 new Calendario(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarEstadioInformacion(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblEstadioInformacion);
+            UIManager.Instance.CargarPantalla("UI/Estadio/EstadioInformacion/EstadioInformacion", instancia =>
+            {
+                new EstadioInformacion(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarEstadioEntradas(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblEntradas);
+            UIManager.Instance.CargarPantalla("UI/Estadio/Entradas/EstadioEntradas", instancia =>
+            {
+                new EstadioEntradas(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarEstadioAmpliaciones(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblAmpliaciones);
+            UIManager.Instance.CargarPantalla("UI/Estadio/Ampliaciones/EstadioAmpliaciones", instancia =>
+            {
+                new EstadioAmpliaciones(instancia, miEquipo, miManager);
             });
         }
 
