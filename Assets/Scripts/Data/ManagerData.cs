@@ -444,5 +444,40 @@ namespace TacticalEleven.Scripts
                 Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
             }
         }
+
+        // ----------------------------------------------------------------------------------- MÉTODO QUE CAMBIA LA TÁCTICA DEL MÁNAGER
+        public static void CambiarTactica(string tactica)
+        {
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var connection = new SQLiteConnection(connString))
+                {
+                    connection.Open();
+
+                    string query = @"UPDATE managers SET tactica = @Tactica";
+
+                    using (var comando = new SQLiteCommand(query, connection))
+                    {
+                        comando.Parameters.AddWithValue("@Tactica", tactica);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
     }
 }

@@ -511,5 +511,219 @@ namespace TacticalEleven.Scripts
                 Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
             }
         }
+
+        // ------------------------------------------------------------------- MÉTODO PARA MOSTRAR EL ENTRENAMIENTO DE UN JUGADOR
+        public static int EntrenamientoJugador(int jugador)
+        {
+            var dbPath = GetDBPath();
+            int num = 0;
+
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return 0;
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"SELECT entrenamiento FROM jugadores WHERE id_jugador = @IdJugador";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        using (var reader = comando.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                num = reader.GetInt32(0);
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return num;
+        }
+
+        // ------------------------------------------------------------------- MÉTODO QUE SELECCIONA UN ENTRENAMIENTO PARA UN JUGADOR
+        public static void EntrenarJugador(int jugador, int tipo)
+        {
+            var dbPath = GetDBPath();
+
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"UPDATE jugadores SET entrenamiento = @Entrenamiento
+                                     WHERE id_jugador = @IdJugador";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        comando.Parameters.AddWithValue("@Entrenamiento", tipo);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
+
+        // ------------------------------------------- MÉTODO PARA MOSTRAR LA LISTA DE JUGADORES DETALLADA POR EQUIPO ENTRE DOS POSICIONES
+        public static List<Jugador> MostrarAlineacion(int inicio, int final)
+        {
+            List<Jugador> listaJugadores = new List<Jugador>();
+
+            try
+            {
+                var dbPath = GetDBPath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"SELECT j.*, a.posicion
+                                     FROM jugadores j
+                                     JOIN alineacion a ON j.id_jugador = a.id_jugador 
+                                     WHERE a.posicion >= @inicio AND a.posicion <= @final 
+                                     ORDER BY a.posicion";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@inicio", inicio);
+                        comando.Parameters.AddWithValue("@final", final);
+                        using (SQLiteDataReader dr = comando.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                // Crear un objeto Jugador y asignar los valores de la base de datos
+                                Jugador jugador = new Jugador
+                                {
+                                    IdJugador = dr.GetInt32(dr.GetOrdinal("id_jugador")),
+                                    Nombre = dr.GetString(dr.GetOrdinal("nombre")),
+                                    Apellido = dr.GetString(dr.GetOrdinal("apellido")),
+                                    IdEquipo = dr.GetInt32(dr.GetOrdinal("id_equipo")),
+                                    Dorsal = dr.GetInt32(dr.GetOrdinal("dorsal")),
+                                    Rol = dr.GetString(dr.GetOrdinal("rol")),
+                                    RolId = dr.GetInt32(dr.GetOrdinal("rol_id")),
+                                    Velocidad = dr.GetInt32(dr.GetOrdinal("velocidad")),
+                                    Resistencia = dr.GetInt32(dr.GetOrdinal("resistencia")),
+                                    Agresividad = dr.GetInt32(dr.GetOrdinal("agresividad")),
+                                    Calidad = dr.GetInt32(dr.GetOrdinal("calidad")),
+                                    EstadoForma = dr.GetInt32(dr.GetOrdinal("estado_forma")),
+                                    Moral = dr.GetInt32(dr.GetOrdinal("moral")),
+                                    Potencial = dr.GetInt32(dr.GetOrdinal("potencial")),
+                                    Portero = dr.GetInt32(dr.GetOrdinal("portero")),
+                                    Pase = dr.GetInt32(dr.GetOrdinal("pase")),
+                                    Regate = dr.GetInt32(dr.GetOrdinal("regate")),
+                                    Remate = dr.GetInt32(dr.GetOrdinal("remate")),
+                                    Entradas = dr.GetInt32(dr.GetOrdinal("entradas")),
+                                    Tiro = dr.GetInt32(dr.GetOrdinal("tiro")),
+                                    FechaNacimiento = DateTime.Parse(dr.GetString(dr.GetOrdinal("fecha_nacimiento"))),
+                                    Peso = dr.GetInt32(dr.GetOrdinal("peso")),
+                                    Altura = dr.GetInt32(dr.GetOrdinal("altura")),
+                                    Lesion = dr.GetInt32(dr.GetOrdinal("lesion")),
+                                    TipoLesion = dr.IsDBNull(dr.GetOrdinal("tipo_lesion")) ? null : dr.GetString(dr.GetOrdinal("tipo_lesion")),
+                                    LesionTratada = dr.GetInt32(dr.GetOrdinal("lesion_tratada")),
+                                    Sancionado = dr.GetInt32(dr.GetOrdinal("sancionado")),
+                                    Nacionalidad = dr.GetString(dr.GetOrdinal("nacionalidad")),
+                                    Status = dr.GetInt32(dr.GetOrdinal("status")),
+                                    PosicionAlineacion = dr.GetInt32(dr.GetOrdinal("posicion")),
+                                    RutaImagen = dr.GetString(dr.GetOrdinal("ruta_imagen"))
+                                };
+
+                                // Agregar el jugador a la lista
+                                listaJugadores.Add(jugador);
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return listaJugadores;
+        }
+
+        // ------------------------------------------------------------------- MÉTODO QUE CAMBIA LAS POSICIONES DE DOS JUGADORES
+        public static void IntercambioPosicion(int jugador1, int jugador2, int posicion1, int posicion2)
+        {
+            var dbPath = GetDBPath();
+
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    using (SQLiteCommand comando = conexion.CreateCommand())
+                    {
+                        // Actualizar la posición del primer jugador
+                        comando.CommandText = @"UPDATE alineacion 
+                                                    SET posicion = @PosicionDos
+                                                    WHERE id_jugador = @IdJugadorUno";
+                        comando.Parameters.AddWithValue("@IdJugadorUno", jugador1);
+                        comando.Parameters.AddWithValue("@PosicionDos", posicion2);
+                        comando.ExecuteNonQuery();
+
+                        // Limpiar parámetros para la segunda consulta
+                        comando.Parameters.Clear();
+
+                        // Actualizar la posición del segundo jugador
+                        comando.CommandText = @"UPDATE alineacion 
+                                                    SET posicion = @PosicionUno
+                                                    WHERE id_jugador = @IdJugadorDos";
+                        comando.Parameters.AddWithValue("@IdJugadorDos", jugador2);
+                        comando.Parameters.AddWithValue("@PosicionUno", posicion1);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
     }
 }

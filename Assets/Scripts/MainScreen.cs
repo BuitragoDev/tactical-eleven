@@ -27,7 +27,8 @@ namespace TacticalEleven.Scripts
         // Elementos Top Menu
         private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares,
                       lblClasificacion, lblResultados, lblEstadisticas, lblPalmaresEquipos, lblPalmaresJugadores,
-                      lblEstadioInformacion, lblEntradas, lblAmpliaciones;
+                      lblEstadioInformacion, lblEntradas, lblAmpliaciones,
+                      lblAlineacion, lblEntrenamiento, lblRival;
 
         void OnEnable()
         {
@@ -73,6 +74,9 @@ namespace TacticalEleven.Scripts
             lblEstadioInformacion = root.Q<Label>("lblInformacionEstadio");
             lblEntradas = root.Q<Label>("lblEntradas");
             lblAmpliaciones = root.Q<Label>("lblAmpliaciones");
+            lblAlineacion = root.Q<Label>("lblAlineacion");
+            lblEntrenamiento = root.Q<Label>("lblEntrenamiento");
+            lblRival = root.Q<Label>("lblRival");
 
             mainContainer = root.Q<VisualElement>("main-container");
 
@@ -90,7 +94,7 @@ namespace TacticalEleven.Scripts
             // Listas por sección
             List<Label> clubList = new List<Label> { lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblClasificacion, lblResultados,
                                                      lblEstadisticas, lblPalmaresJugadores, lblPalmaresEquipos, lblEstadioInformacion, lblEntradas,
-                                                     lblAmpliaciones };
+                                                     lblAmpliaciones, lblAlineacion, lblEntrenamiento, lblRival };
 
             // --- UIManager ---
             if (UIManager.Instance == null)
@@ -217,6 +221,22 @@ namespace TacticalEleven.Scripts
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
                 MenuVisibility(menuList, alineacionMenu);
+                CargarEntrenadorAlineacion(clubList);
+            });
+            lblAlineacion.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarEntrenadorAlineacion(clubList);
+            });
+            lblEntrenamiento.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarEntrenadorEntrenamiento(clubList);
+            });
+            lblRival.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarEntrenadorRival(clubList);
             });
 
             // ---------------------------------------------------- Eventos COMPETICIONES
@@ -424,6 +444,33 @@ namespace TacticalEleven.Scripts
             UIManager.Instance.CargarPantalla("UI/Club/Lesionados/ClubLesionados", instancia =>
             {
                 new ClubLesionados(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarEntrenadorAlineacion(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblAlineacion);
+            UIManager.Instance.CargarPantalla("UI/Entrenador/Alineacion/EntrenadorAlineacion", instancia =>
+            {
+                new EntrenadorAlineacion(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarEntrenadorEntrenamiento(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblEntrenamiento);
+            UIManager.Instance.CargarPantalla("UI/Entrenador/Entrenamiento/EntrenadorEntrenamiento", instancia =>
+            {
+                new EntrenadorEntrenamiento(instancia, miEquipo, miManager);
+            });
+        }
+
+        private void CargarEntrenadorRival(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblRival);
+            UIManager.Instance.CargarPantalla("UI/Entrenador/Rival/EntrenadorRival", instancia =>
+            {
+                new EntrenadorRival(instancia, miEquipo, miManager);
             });
         }
 

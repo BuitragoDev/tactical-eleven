@@ -56,7 +56,7 @@ namespace TacticalEleven.Scripts
                 {
                     conexion.Open();
 
-                    string query = @"SELECT id_empleadoDisponible, nombre, puesto, categoria, salario, id_manager, id_equipo
+                    string query = @"SELECT id_empleadoDisponible, nombre, puesto, categoria, salario, id_equipo
                                      FROM empleados_disponibles 
                                      WHERE puesto = @Puesto
                                      ORDER BY RANDOM()
@@ -76,8 +76,7 @@ namespace TacticalEleven.Scripts
                                     Puesto = dr.GetString(2), // Puesto es un string
                                     Categoria = dr.GetInt32(3), // Categoria es un entero
                                     Salario = dr.GetInt32(4), // Salario es un entero
-                                    IdManager = dr.IsDBNull(5) ? (int?)null : dr.GetInt32(5), // Si es NULL, asignamos null
-                                    IdEquipo = dr.IsDBNull(6) ? (int?)null : dr.GetInt32(6)
+                                    IdEquipo = dr.IsDBNull(5) ? (int?)null : dr.GetInt32(5)
                                 });
                             }
                         }
@@ -113,7 +112,7 @@ namespace TacticalEleven.Scripts
                 {
                     conexion.Open();
 
-                    string query = @"SELECT id_empleado, nombre, puesto, categoria, salario, id_manager, id_equipo
+                    string query = @"SELECT id_empleado, nombre, puesto, categoria, salario, id_equipo
                                      FROM empleados WHERE id_equipo = @Equipo";
 
                     using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
@@ -130,8 +129,7 @@ namespace TacticalEleven.Scripts
                                     Puesto = dr.GetString(2), // Puesto es un string
                                     Categoria = dr.GetInt32(3), // Categoria es un entero
                                     Salario = dr.GetInt32(4), // Salario es un entero
-                                    IdManager = dr.IsDBNull(5) ? (int?)null : dr.GetInt32(5), // Si es NULL, asignamos null
-                                    IdEquipo = dr.IsDBNull(6) ? (int?)null : dr.GetInt32(6)
+                                    IdEquipo = dr.IsDBNull(5) ? (int?)null : dr.GetInt32(5)
                                 });
                             }
                         }
@@ -183,8 +181,7 @@ namespace TacticalEleven.Scripts
                                     Puesto = dr.IsDBNull(2) ? null : dr.GetString(2),
                                     Categoria = dr.GetInt32(3),
                                     Salario = dr.GetInt32(4),
-                                    IdManager = dr.IsDBNull(5) ? null : dr.GetInt32(5),
-                                    IdEquipo = dr.IsDBNull(6) ? null : dr.GetInt32(6)
+                                    IdEquipo = dr.IsDBNull(5) ? null : dr.GetInt32(5)
                                 };
                             }
                         }

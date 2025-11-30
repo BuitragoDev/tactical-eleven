@@ -587,5 +587,94 @@ namespace TacticalEleven.Scripts
 
             return lista;
         }
+
+        // -------------------------------------------------------------- MÉTODO PARA MOSTRAR LAS ESTADÍSTICAS DE UN JUGADOR
+        public static Estadistica MostrarEstadisticasJugador(int id)
+        {
+            Estadistica total = new Estadistica();
+
+            try
+            {
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                }
+
+                using var conexion = new SQLiteConnection($"Data Source={dbPath};Version=3;");
+                conexion.Open();
+
+                // Tablas a consultar
+                string[] tablas = { "estadisticas_jugadores", "estadisticas_jugadores_europa" };
+
+                foreach (string tabla in tablas)
+                {
+                    Estadistica parcial = LeerEstadisticasDesdeTabla(id, tabla, conexion);
+
+                    // Sumar si existen datos
+                    if (parcial != null && parcial.IdJugador != 0)
+                    {
+                        total.PartidosJugados += parcial.PartidosJugados;
+                        total.Goles += parcial.Goles;
+                        total.Asistencias += parcial.Asistencias;
+                        total.TarjetasAmarillas += parcial.TarjetasAmarillas;
+                        total.TarjetasRojas += parcial.TarjetasRojas;
+                        total.MVP += parcial.MVP;
+
+                        // Siempre devolver el id
+                        total.IdJugador = id;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al leer estadísticas: {ex.Message}");
+            }
+
+            return total;
+        }
+
+        // Método auxiliar reutilizable
+        private static Estadistica LeerEstadisticasDesdeTabla(int id, string tabla, SQLiteConnection conexion)
+        {
+            try
+            {
+                string query = $@"SELECT 
+                                    id_jugador,
+                                    partidosJugados,
+                                    goles,
+                                    asistencias,
+                                    tarjetasAmarillas,
+                                    tarjetasRojas,
+                                    mvp
+                                FROM {tabla}
+                                WHERE id_jugador = @idJugador";
+
+                using var cmd = new SQLiteCommand(query, conexion);
+                cmd.Parameters.AddWithValue("@idJugador", id);
+
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Estadistica
+                    {
+                        IdJugador = reader.GetInt32(0),
+                        PartidosJugados = reader.IsDBNull(1) ? 0 : reader.GetInt32(1),
+                        Goles = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+                        Asistencias = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+                        TarjetasAmarillas = reader.IsDBNull(4) ? 0 : reader.GetInt32(4),
+                        TarjetasRojas = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
+                        MVP = reader.IsDBNull(6) ? 0 : reader.GetInt32(6)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error leyendo tabla {tabla}: {ex.Message}");
+            }
+
+            return null;
+        }
     }
 }

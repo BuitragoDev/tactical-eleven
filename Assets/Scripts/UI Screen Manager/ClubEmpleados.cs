@@ -457,6 +457,17 @@ namespace TacticalEleven.Scripts
                     PagarIndemnizacion(puesto);
                     EmpleadoData.DespedirEmpleado(puesto);
 
+                    // Quitar entrenamiento a los jugadores si se despide al Preparador Físico
+                    if (boton == btnDespedir4)
+                    {
+
+                        List<Jugador> jugadores = JugadorData.ListadoJugadoresCompleto(miEquipo.IdEquipo);
+                        foreach (var jugador in jugadores)
+                        {
+                            JugadorData.EntrenarJugador(jugador.IdJugador, 0);
+                        }
+                    }
+
                     CargarEmpleadosContratados();
                     LimpiarEmpleadosDisponibles();
                     LimpiarFichaEmpleado();
