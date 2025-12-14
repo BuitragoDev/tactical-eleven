@@ -321,6 +321,11 @@ namespace TacticalEleven.Scripts
                 AudioManager.Instance.PlaySFX(clickSFX);
                 CargarFichajesListaTraspasos(clubList);
             });
+            lblEstadoOfertas.RegisterCallback<ClickEvent>(evt =>
+            {
+                AudioManager.Instance.PlaySFX(clickSFX);
+                CargarFichajesEstadoOfertas(clubList);
+            });
 
             // ---------------------------------------------------- Eventos FINANZAS
             finanzasIcon.RegisterCallback<ClickEvent>(evt =>
@@ -625,6 +630,15 @@ namespace TacticalEleven.Scripts
             UIManager.Instance.CargarPantalla("UI/Fichajes/ListaTraspasos/FichajesListaTraspasos", instancia =>
             {
                 new FichajesListaTraspasos(instancia, miEquipo, miManager, this);
+            });
+        }
+
+        private void CargarFichajesEstadoOfertas(List<Label> clubList)
+        {
+            CambiarColorTextoClub(clubList, lblEstadoOfertas);
+            UIManager.Instance.CargarPantalla("UI/Fichajes/EstadoOfertas/FichajesEstadoOfertas", instancia =>
+            {
+                new FichajesEstadoOfertas(instancia, miEquipo, miManager, this);
             });
         }
 

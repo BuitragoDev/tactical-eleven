@@ -17,7 +17,7 @@
             <ui:Button text="SEGUIR" name="btnSeguir" class="back-button" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;);" />
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement name="ventanaDetalles" class="ventana-detalles">
+    <ui:VisualElement name="ventanaDetalles" class="ventana-detalles" style="display: none;">
         <ui:VisualElement name="detalles-top-area" class="detalles-top-area" style="flex-grow: 1;">
             <ui:Label text="DETALLES DEL EQUIPO" class="ventana-detalles-title" />
         </ui:VisualElement>

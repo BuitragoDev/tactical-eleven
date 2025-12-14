@@ -114,6 +114,9 @@ namespace TacticalEleven.Scripts
                     ? new Color32(255, 255, 255, 255)     // blanco
                     : new Color32(242, 242, 242, 255);    // gris suave
 
+                // Aplicar color final
+                fila.style.backgroundColor = new StyleColor(filaColor);
+
                 // 1) Foto del Jugador
                 var foto = new VisualElement();
                 foto.style.width = Length.Percent(col1);

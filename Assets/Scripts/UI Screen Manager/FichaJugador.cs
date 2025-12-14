@@ -136,6 +136,12 @@ namespace TacticalEleven.Scripts
                             new FichajesCartera(instancia, miEquipo, miManager, mainScreen);
                         });
                         break;
+                    case 5:
+                        UIManager.Instance.CargarPantalla("UI/Fichajes/EstadoOfertas/FichajesEstadoOfertas", instancia =>
+                        {
+                            new FichajesEstadoOfertas(instancia, miEquipo, miManager, mainScreen);
+                        });
+                        break;
                 }
             };
 
