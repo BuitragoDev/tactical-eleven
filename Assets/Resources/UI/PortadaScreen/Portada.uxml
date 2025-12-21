@@ -91,7 +91,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 0; width: 60%; height: 100%; justify-content: center; align-items: center; align-content: center; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; align-self: center; flex-shrink: 0;">
                             <ui:Label text="GOLES" name="Label" class="estadisticas-equipo-label-green" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px; align-items: center; -unity-text-align: middle-left; justify-content: center; align-self: flex-start; align-content: center; width: 100%;" />
-                            <ui:Label text="-" name="maximo-goleador-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px; width: 100%;" />
+                            <ui:Label text="-" name="maximo-goleador-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 22px; width: 100%;" />
                             <ui:Label text="Partidos jugados: 0" name="maximo-goleador-pj" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Regular&apos;); font-size: 18px; width: 100%;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 15%; height: 100%; background-color: rgb(56, 78, 63); align-items: center; justify-content: center; align-self: center; align-content: center;">
@@ -104,7 +104,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 60%; height: 100%; justify-content: center; align-items: flex-start;">
                             <ui:Label text="ASISTENCIAS" name="Label" class="estadisticas-equipo-label-green" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
-                            <ui:Label text="-" name="maximo-asistente-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
+                            <ui:Label text="-" name="maximo-asistente-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 22px;" />
                             <ui:Label text="Partidos jugados: 0" name="maximo-asistente-pj" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Regular&apos;); font-size: 18px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 15%; height: 100%; background-color: rgb(56, 78, 63); align-items: center; justify-content: center; align-self: center; align-content: center;">
@@ -117,7 +117,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 60%; height: 100%; justify-content: center; align-items: flex-start;">
                             <ui:Label text="TARJETAS AMARILLAS" name="Label" class="estadisticas-equipo-label-green" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
-                            <ui:Label text="-" name="maximo-ta-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
+                            <ui:Label text="-" name="maximo-ta-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 22px;" />
                             <ui:Label text="Partidos jugados: 0" name="maximo-ta-pj" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Regular&apos;); font-size: 18px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 15%; height: 100%; background-color: rgb(56, 78, 63); align-items: center; justify-content: center; align-self: center; align-content: center;">
@@ -130,7 +130,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 60%; height: 100%; justify-content: center; align-items: flex-start;">
                             <ui:Label text="TARJETAS ROJAS" name="Label" class="estadisticas-equipo-label-green" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
-                            <ui:Label text="-" name="maximo-tr-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
+                            <ui:Label text="-" name="maximo-tr-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 22px;" />
                             <ui:Label text="Partidos jugados: 0" name="maximo-tr-pj" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Regular&apos;); font-size: 18px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 15%; height: 100%; background-color: rgb(56, 78, 63); align-items: center; justify-content: center; align-self: center; align-content: center;">
@@ -143,7 +143,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 60%; height: 100%; justify-content: center; align-items: flex-start;">
                             <ui:Label text="MVP DEL PARTIDO" name="Label" class="estadisticas-equipo-label-green" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
-                            <ui:Label text="-" name="maximo-mvp-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 24px;" />
+                            <ui:Label text="-" name="maximo-mvp-nombre" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 22px;" />
                             <ui:Label text="Partidos jugados: 0" name="maximo-mvp-pj" class="estadisticas-equipo-label-black" style="-unity-font-definition: resource(&apos;Fonts/Poppins-Regular&apos;); font-size: 18px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 15%; height: 100%; background-color: rgb(56, 78, 63); align-items: center; justify-content: center; align-self: center; align-content: center;">

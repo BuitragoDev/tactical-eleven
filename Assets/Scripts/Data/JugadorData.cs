@@ -954,5 +954,245 @@ namespace TacticalEleven.Scripts
                 Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
             }
         }
+
+        // ------------------------------------------------------------------------- MÉTODO QUE CREA UNA NUEVA FECHA DE NEGOCIACIÓN
+        public static void NegociacionCancelada(int jugador, int dias)
+        {
+            DateTime fechaEnfado = FechaData.hoy.AddDays(dias);
+
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var connection = new SQLiteConnection(connString))
+                {
+                    connection.Open();
+
+                    string query = @"UPDATE jugadores SET proxima_negociacion = @FechaEnfado WHERE id_jugador = @IdJugador";
+
+                    using (var comando = new SQLiteCommand(query, connection))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        comando.Parameters.AddWithValue("@FechaEnfado", fechaEnfado.ToString("yyyy-MM-dd"));
+                        comando.ExecuteNonQuery();
+                    }
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
+
+        // --------------------------------------------------------- MÉTODO QUE DEVUELVE EL SALARIO MEDIO DE LOS JUGADORES CON LA MISMA MEDIA
+        public static int SalarioMedioJugadores(int jugador)
+        {
+            var dbPath = GetDBPath();
+            int num = 0;
+
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return 0;
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"WITH media_objetivo AS (
+                                        SELECT 
+                                            (velocidad + resistencia + agresividad + calidad + estado_forma + moral) / 6.0 AS media
+                                        FROM jugadores
+                                        WHERE id_jugador = @IdJugador
+                                     )
+                                     SELECT 
+                                        CAST((CAST(AVG(c.salario_anual) AS FLOAT) + 500) / 1000 AS INTEGER) * 1000 AS salario_medio
+                                     FROM jugadores j
+                                     JOIN contratos c ON j.id_jugador = c.id_jugador
+                                     JOIN media_objetivo mo ON 
+                                        ABS(((j.velocidad + j.resistencia + j.agresividad + j.calidad + j.estado_forma + j.moral) / 6.0) - mo.media) < 0.01";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        using (var reader = comando.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                num = reader.GetInt32(0);
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return num;
+        }
+
+        // --------------------------------------------------------- MÉTODO QUE DEVUELVE LA CLAUSULA MEDIA DE LOS JUGADORES CON LA MISMA MEDIA
+        public static int ClausulaMediaJugadores(int jugador)
+        {
+            var dbPath = GetDBPath();
+            int num = 0;
+
+            try
+            {
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return 0;
+                }
+
+                string conexionString = $"Data Source={dbPath};Version=3;";
+                using (var conexion = new SQLiteConnection(conexionString))
+                {
+                    conexion.Open();
+
+                    string query = @"WITH media_objetivo AS (
+                                        SELECT 
+                                            (velocidad + resistencia + agresividad + calidad + estado_forma + moral) / 6.0 AS media
+                                        FROM jugadores
+                                        WHERE id_jugador = @IdJugador
+                                     )
+                                     SELECT 
+                                        CAST((CAST(AVG(c.clausula_rescision) AS FLOAT) + 500) / 1000 AS INTEGER) * 1000 AS clausula_media
+                                     FROM jugadores j
+                                     JOIN contratos c ON j.id_jugador = c.id_jugador
+                                     JOIN media_objetivo mo ON 
+                                        ABS(((j.velocidad + j.resistencia + j.agresividad + j.calidad + j.estado_forma + j.moral) / 6.0) - mo.media) < 0.01";
+
+                    using (SQLiteCommand comando = new SQLiteCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        using (var reader = comando.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                num = reader.GetInt32(0);
+                            }
+                        }
+                    }
+
+                    conexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+
+            return num;
+        }
+
+        // ------------------------------------------------------------------------- MÉTODO QUE RENUEVA EL STATUS DE UN JUGADOR
+        public static void RenovarStatusJugador(int jugador, int rol)
+        {
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var connection = new SQLiteConnection(connString))
+                {
+                    connection.Open();
+
+                    string query = @"UPDATE jugadores SET status = @Status WHERE id_jugador = @IdJugador";
+
+                    using (var comando = new SQLiteCommand(query, connection))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        comando.Parameters.AddWithValue("@Status", rol);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
+
+        // ------------------------------------------------------------------------- MÉTODO QUE RENUEVA EL CONTRATO DE UN JUGADOR
+        public static void RenovarContratoJugador(int jugador, int salario, int clausula, int anios, int bonusP, int bonusG)
+        {
+            FechaData fechaData = new FechaData();
+            fechaData.InicializarTemporadaActual();
+            DateTime nuevaFecha = new DateTime(FechaData.hoy.Year + anios, 6, 30);
+
+            try
+            {
+                // Usa la base activa (temporal si existe)
+                string dbPath = DatabaseManager.GetActiveDatabasePath();
+
+                if (!File.Exists(dbPath))
+                {
+                    Debug.LogError($"No se encontró la base de datos en {dbPath}");
+                    return;
+                }
+
+                string connString = $"Data Source={dbPath};Version=3;";
+                using (var connection = new SQLiteConnection(connString))
+                {
+                    connection.Open();
+
+                    string query = @"UPDATE contratos SET salario_anual = @Salario, 
+                                                          clausula_rescision = @Clausula, 
+                                                          duracion = @Anios, 
+                                                          bono_por_partidos = @BonusP, 
+                                                          bono_por_goles = @BonusG, 
+                                                          fecha_inicio = @FechaInicio,
+                                                          fecha_fin = @FechaFin
+                                     WHERE id_jugador = @IdJugador";
+
+                    using (var comando = new SQLiteCommand(query, connection))
+                    {
+                        comando.Parameters.AddWithValue("@IdJugador", jugador);
+                        comando.Parameters.AddWithValue("@Salario", salario);
+                        comando.Parameters.AddWithValue("@Clausula", clausula);
+                        comando.Parameters.AddWithValue("@Anios", anios);
+                        comando.Parameters.AddWithValue("@FechaInicio", FechaData.hoy.ToString("yyyy-MM-dd"));
+                        comando.Parameters.AddWithValue("@FechaFin", nuevaFecha.ToString("yyyy-MM-dd"));
+                        comando.Parameters.AddWithValue("@BonusP", bonusP);
+                        comando.Parameters.AddWithValue("@BonusG", bonusG);
+                        comando.ExecuteNonQuery();
+                    }
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error al guardar en la base de datos: {ex.Message}");
+            }
+        }
     }
 }

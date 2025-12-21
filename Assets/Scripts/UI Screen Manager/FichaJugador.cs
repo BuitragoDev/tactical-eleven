@@ -15,15 +15,17 @@ namespace TacticalEleven.Scripts
         private Manager miManager;
         private int elJugador;
         private int procedencia;
+        int opcionBotones = 1;
+        int respuestaEquipo = 0;
 
-        private VisualElement root, popupContainer, popupContainerTransferible, popupContainerNoTransferible, popupContainerOjear, fotoJugador,
-                              imagenPosicion, escudo, moral, estadoAnimo, situacionMercado, lesionado, rol;
+        private VisualElement root, popupContainer, popupContainerTransferible, popupContainerNoTransferible, popupContainerOjear, popupContainerRenovar,
+                              fotoJugador, imagenPosicion, escudo, moral, estadoAnimo, situacionMercado, lesionado, rol;
         private Label dorsal, nombreJugador, mediaTotal, nombreEquipo, posicion, altura, peso, edad, nacionalidad, valorMercado,
                       condicionFisica, salario, aniosRestantes, clausula, bonusPartidos, bonusGol,
                       velocidad, resistencia, agresividad, calidad, potencial, portero, pase, regate, remate, entradas, tiro, popupText,
-                      popupTextTransferible, popupTextNoTransferible, popupTextOjear;
+                      popupTextTransferible, popupTextNoTransferible, popupTextOjear, popupTextRenovar;
         private Button btnVolver, btnDespedir, btnRenovar, btnPonerEnMercado, btnQuitarMercado, btnContratar, btnOjear, btnYes, btnCancel,
-                       btnTransferible, btnCedible, btnSalir, btnNoTransferible, btnSalirTransferible, btnAceptar;
+                       btnTransferible, btnCedible, btnSalir, btnNoTransferible, btnSalirTransferible, btnAceptar, btnYesRenovar, btnCancelRenovar;
 
         public FichaJugador(VisualElement rootInstance, Equipo equipo, Manager manager, int jugador, int proc, MainScreen mainScreen)
         {
@@ -101,11 +103,32 @@ namespace TacticalEleven.Scripts
             btnAceptar = root.Q<Button>("btnAceptar");
             popupTextOjear = root.Q<Label>("popup-text-ojear");
 
+            popupContainerRenovar = root.Q<VisualElement>("popup-container-renovar");
+            btnYesRenovar = root.Q<Button>("btnYesRenovar");
+            btnCancelRenovar = root.Q<Button>("btnCancelRenovar");
+            popupTextRenovar = root.Q<Label>("popup-text-renovar");
+
             Jugador jugadorSeleccionado = JugadorData.MostrarDatosJugador(elJugador);
+
+            // Lista con los label de Mercado.
+            List<Label> clubList = new List<Label> { mainScreen.lblInformacion, mainScreen.lblPlantilla, mainScreen.lblEmpleados, mainScreen.lblLesionados, mainScreen.lblClasificacion, mainScreen.lblResultados,
+                                                     mainScreen.lblEstadisticas, mainScreen.lblPalmaresJugadores, mainScreen.lblPalmaresEquipos, mainScreen.lblEstadioInformacion, mainScreen.lblEntradas,
+                                                     mainScreen.lblAmpliaciones, mainScreen.lblAlineacion, mainScreen.lblEntrenamiento, mainScreen.lblRival, mainScreen.lblIngresos, mainScreen.lblGastos,
+                                                     mainScreen.lblPatrocinadores, mainScreen.lblTelevision, mainScreen.lblPrestamos, mainScreen.lblMercado, mainScreen.lblBusqueda, mainScreen.lblCartera,
+                                                     mainScreen.lblEstadoOfertas, mainScreen.lblListaTraspasos };
+
+            List<VisualElement> menuList = new List<VisualElement> { mainScreen.clubMenu, mainScreen.alineacionMenu, mainScreen.competicionMenu,
+                                                                     mainScreen.calendarioMenu, mainScreen.fichajesMenu, mainScreen.finanzasMenu,
+                                                                     mainScreen.estadioMenu, mainScreen.managerMenu, mainScreen.mensajesMenu };
 
             // Cargar sección Datos del Jugador
             CargarDatosJugador(jugadorSeleccionado);
             CargarOtrosDatosJugador(jugadorSeleccionado);
+            CargarBotones(jugadorSeleccionado);
+            ComprobarEquipoOfertaAceptadaTextoBotones(jugadorSeleccionado);
+
+            if (procedencia == 0)
+                btnVolver.text = "CERRAR";
 
             btnVolver.clicked += () =>
             {
@@ -117,30 +140,55 @@ namespace TacticalEleven.Scripts
                         {
                             new ClubPlantilla(instancia, miEquipo, miManager, mainScreen);
                         });
+                        mainScreen.MenuVisibility(menuList, mainScreen.clubMenu);
+                        mainScreen.CambiarColorTextoClub(clubList, mainScreen.lblPlantilla);
                         break;
                     case 2:
                         UIManager.Instance.CargarPantalla("UI/Fichajes/Mercado/FichajesMercado", instancia =>
                         {
                             new FichajesMercado(instancia, miEquipo, miManager, mainScreen);
                         });
+                        mainScreen.MenuVisibility(menuList, mainScreen.fichajesMenu);
+                        mainScreen.CambiarColorTextoClub(clubList, mainScreen.lblMercado);
                         break;
                     case 3:
                         UIManager.Instance.CargarPantalla("UI/Fichajes/BuscarPorEquipo/FichajesBuscarPorEquipo", instancia =>
                         {
                             new FichajesBuscarPorEquipo(instancia, miEquipo, miManager, mainScreen, jugadorSeleccionado.IdEquipo);
                         });
+                        mainScreen.MenuVisibility(menuList, mainScreen.fichajesMenu);
+                        mainScreen.CambiarColorTextoClub(clubList, mainScreen.lblBusqueda);
                         break;
                     case 4:
                         UIManager.Instance.CargarPantalla("UI/Fichajes/Cartera/FichajesCartera", instancia =>
                         {
                             new FichajesCartera(instancia, miEquipo, miManager, mainScreen);
                         });
+                        mainScreen.MenuVisibility(menuList, mainScreen.fichajesMenu);
+                        mainScreen.CambiarColorTextoClub(clubList, mainScreen.lblCartera);
                         break;
                     case 5:
                         UIManager.Instance.CargarPantalla("UI/Fichajes/EstadoOfertas/FichajesEstadoOfertas", instancia =>
                         {
                             new FichajesEstadoOfertas(instancia, miEquipo, miManager, mainScreen);
                         });
+                        mainScreen.MenuVisibility(menuList, mainScreen.fichajesMenu);
+                        mainScreen.CambiarColorTextoClub(clubList, mainScreen.lblEstadoOfertas);
+                        break;
+                    case 0:
+                        UIManager.Instance.CargarPantalla("UI/PortadaScreen/Portada", instancia =>
+                        {
+                            new PortadaManager(instancia, miEquipo, miManager);
+                        });
+                        mainScreen.MenuVisibility(menuList, null);
+                        break;
+                    case -1:
+                        UIManager.Instance.CargarPantalla("UI/Fichajes/EstadoOfertas/FichajesEstadoOfertas", instancia =>
+                        {
+                            new FichajesEstadoOfertas(instancia, miEquipo, miManager, mainScreen);
+                        });
+                        mainScreen.MenuVisibility(menuList, mainScreen.fichajesMenu);
+                        mainScreen.CambiarColorTextoClub(clubList, mainScreen.lblEstadoOfertas);
                         break;
                 }
             };
@@ -263,7 +311,68 @@ namespace TacticalEleven.Scripts
             btnRenovar.clicked += () =>
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
+                btnYesRenovar.clicked -= OnAceptar;
+                btnCancelRenovar.clicked -= OnCancelar;
 
+                Jugador _jugador = JugadorData.MostrarDatosJugador(jugadorSeleccionado.IdJugador);
+                int? aniosContrato = _jugador.AniosContrato;
+                DateTime? proximaNegociacion = jugadorSeleccionado.ProximaNegociacion;
+                string mensajeProximaNegociacion = proximaNegociacion.HasValue
+                    ? proximaNegociacion.Value.ToString("dd/MM/yyyy")
+                    : "(No hay una fecha disponible)";
+
+                if (proximaNegociacion == null)
+                {
+                    if (_jugador.NombreCompleto != null)
+                    {
+                        if (aniosContrato <= 3)
+                        {
+                            popupContainerRenovar.style.display = DisplayStyle.Flex;
+                            popupTextRenovar.text = "¿Estás seguro de renovar a " + _jugador.NombreCompleto.ToUpper() + "?";
+                        }
+                        else
+                        {
+                            popupContainerRenovar.style.display = DisplayStyle.Flex;
+                            btnYesRenovar.style.display = DisplayStyle.None;
+                            btnCancelRenovar.text = "CERRAR";
+                            btnCancelRenovar.style.backgroundColor = new Color(0.094f, 0.227f, 0.153f);
+                            popupTextRenovar.text = "A " + _jugador.NombreCompleto.ToUpper() + " aún le quedan " + aniosContrato + " años de contrato y no puede ser renovado.";
+                        }
+                    }
+                }
+                else
+                {
+                    popupContainerRenovar.style.display = DisplayStyle.Flex;
+                    popupTextRenovar.text = "En estos momentos " + (_jugador.NombreCompleto ?? "el jugador") + " no quiere reunirse contigo. A partir del próximo " + (proximaNegociacion?.ToString("dd/MM/yyyy") ?? "No disponible") + " puedes volver a intentarlo.";
+                }
+
+                void OnAceptar()
+                {
+                    AudioManager.Instance.PlaySFX(clickSFX);
+
+                    popupContainerRenovar.style.display = DisplayStyle.None;
+
+                    UIManager.Instance.CargarPantalla("UI/Negociaciones/NegociacionesOfertaJugador", instancia =>
+                    {
+                        new NegociacionesOfertaJugador(instancia, miEquipo, miManager, jugadorSeleccionado, mainScreen);
+                    });
+
+                    btnYesRenovar.clicked -= OnAceptar;
+                }
+
+                void OnCancelar()
+                {
+                    AudioManager.Instance.PlaySFX(clickSFX);
+
+                    popupContainerRenovar.style.display = DisplayStyle.None;
+                    btnYesRenovar.style.display = DisplayStyle.Flex;
+                    btnCancelRenovar.text = "CANCELAR";
+                    btnCancelRenovar.style.backgroundColor = new Color(0.7f, 0.0f, 0.0f);
+                    btnCancelRenovar.clicked -= OnCancelar;
+                }
+
+                btnYesRenovar.clicked += OnAceptar;
+                btnCancelRenovar.clicked += OnCancelar;
             };
 
             btnPonerEnMercado.clicked += () =>
@@ -490,6 +599,53 @@ namespace TacticalEleven.Scripts
             {
                 AudioManager.Instance.PlaySFX(clickSFX);
 
+                btnAceptar.clicked -= OnAceptar;
+
+                DateTime? proximaNegociacion = jugadorSeleccionado.ProximaNegociacion;
+                string mensajeProximaNegociacion = proximaNegociacion.HasValue
+                    ? proximaNegociacion.Value.ToString("dd/MM/yyyy")
+                    : "(No hay una fecha disponible)";
+
+                if (jugadorSeleccionado.ProximaNegociacion > FechaData.hoy)
+                {
+                    popupContainerOjear.style.display = DisplayStyle.Flex;
+                    popupTextOjear.text = "En estos momentos el " + (jugadorSeleccionado.NombreEquipo ?? "el equipo") + " no quiere reunirse contigo. A partir del próximo " + (proximaNegociacion?.ToString("dd/MM/yyyy") ?? "No disponible") + " puedes volver a intentarlo.";
+                }
+                else
+                {
+                    if (respuestaEquipo == 1)
+                    {
+                        // Ir a Negociar con el jugador
+                        UIManager.Instance.CargarPantalla("UI/Negociaciones/NegociacionesOfertaJugador", instancia =>
+                        {
+                            new NegociacionesOfertaJugador(instancia, miEquipo, miManager, jugadorSeleccionado, mainScreen);
+                        });
+                    }
+                    else
+                    {
+                        // Ir a Negociar con el equipo
+                        UIManager.Instance.CargarPantalla("UI/Negociaciones/NegociacionesOfertaEquipo", instancia =>
+                        {
+                            new NegociacionesOfertaEquipo(instancia, miEquipo, miManager, jugadorSeleccionado, mainScreen);
+                        });
+                    }
+                }
+
+                void OnAceptar()
+                {
+                    AudioManager.Instance.PlaySFX(clickSFX);
+
+                    // Actualizamos el objeto Jugador
+                    Jugador nuevoJugador = JugadorData.MostrarDatosJugador(jugadorSeleccionado.IdJugador);
+
+                    CargarOtrosDatosJugador(nuevoJugador);
+                    CargarBotones(nuevoJugador);
+
+                    popupContainerOjear.style.display = DisplayStyle.None;
+                    btnAceptar.clicked -= OnAceptar;
+                }
+
+                btnAceptar.clicked += OnAceptar;
             };
 
             btnOjear.clicked += () =>
@@ -603,6 +759,16 @@ namespace TacticalEleven.Scripts
 
                 btnAceptar.clicked += OnAceptar;
             };
+        }
+
+        private void ComprobarEquipoOfertaAceptadaTextoBotones(Jugador jugadorSeleccionado)
+        {
+            // Comprobar si el jugador tiene oferta aceptada por el equipo
+            respuestaEquipo = TransferenciaData.ComprobarRespuestaEquipo(jugadorSeleccionado.IdJugador, miEquipo.IdEquipo, jugadorSeleccionado.IdEquipo);
+            if (respuestaEquipo == 1)
+                btnContratar.text = "NEGOCIAR CONTRATO";
+            else
+                btnContratar.text = "CONTRATAR";
         }
 
         private void CargarAtributosSinOjear(Jugador jugadorSeleccionado)
@@ -867,6 +1033,63 @@ namespace TacticalEleven.Scripts
                 btnPonerEnMercado.style.display = DisplayStyle.None;
                 btnQuitarMercado.style.display = DisplayStyle.None;
                 btnContratar.style.display = DisplayStyle.Flex;
+            }
+        }
+
+        private void CargarBotones(Jugador jugadorSeleccionado)
+        {
+            bool ojeado = OjearData.ComprobarJugadorOjeado(jugadorSeleccionado.IdJugador);
+
+            if (jugadorSeleccionado.IdEquipo == miEquipo.IdEquipo)
+                opcionBotones = 1;
+            else
+                opcionBotones = 2;
+
+            if (opcionBotones == 1)
+            {
+                btnVolver.style.display = DisplayStyle.Flex;
+                btnDespedir.style.display = DisplayStyle.Flex;
+                btnRenovar.style.display = DisplayStyle.Flex;
+
+                if (jugadorSeleccionado.SituacionMercado != 0)
+                {
+                    btnPonerEnMercado.style.display = DisplayStyle.None;
+                    btnQuitarMercado.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    btnPonerEnMercado.style.display = DisplayStyle.Flex;
+                    btnQuitarMercado.style.display = DisplayStyle.None;
+                }
+
+                btnContratar.style.display = DisplayStyle.None;
+                btnOjear.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                btnVolver.style.display = DisplayStyle.Flex;
+                btnDespedir.style.display = DisplayStyle.None;
+                btnRenovar.style.display = DisplayStyle.None;
+                btnPonerEnMercado.style.display = DisplayStyle.None;
+                btnQuitarMercado.style.display = DisplayStyle.None;
+                btnContratar.style.display = DisplayStyle.Flex; ;
+                btnOjear.style.display = DisplayStyle.Flex; ;
+            }
+
+            List<Transferencia> ofertas = TransferenciaData.ListarTraspasos();
+            DateTime fechaHoy = FechaData.hoy;
+            DateTime fechaManiana = fechaHoy.AddDays(1);
+
+            foreach (var oferta in ofertas)
+            {
+                if (!string.IsNullOrWhiteSpace(oferta.FechaTraspaso) &&
+                    DateTime.TryParse(oferta.FechaTraspaso, out DateTime fechaTraspaso) &&
+                    oferta.IdJugador == jugadorSeleccionado.IdJugador &&
+                    fechaTraspaso == fechaManiana)
+                {
+                    btnContratar.SetEnabled(false);
+                    btnOjear.SetEnabled(false);
+                }
             }
         }
 

@@ -392,6 +392,29 @@ namespace TacticalEleven.Scripts
             return (int)cantidadConvertida;
         }
 
+        public static string nombreMoneda()
+        {
+            string currency = PlayerPrefs.GetString("Currency", string.Empty);
+            string moneda = EURO_NAME;
+
+            if (currency != string.Empty)
+            {
+                switch (currency)
+                {
+                    case Constants.EURO_NAME:
+                        moneda = ("Euros");
+                        break;
+                    case Constants.POUND_NAME:
+                        moneda = "Libras esterlinas";
+                        break;
+                    case Constants.DOLLAR_NAME:
+                        moneda = "Dólares americanos";
+                        break;
+                }
+            }
+
+            return moneda;
+        }
     }
 }
 

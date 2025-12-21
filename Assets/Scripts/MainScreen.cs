@@ -15,7 +15,7 @@ namespace TacticalEleven.Scripts
         private VisualElement miEquipoEscudo, cabeceraManagerValoracion;
         private VisualElement homeIcon, clubIcon, alineacionIcon, competicionesIcon, calendarioIcon,
                               fichajesIcon, finanzasIcon, estadioIcon, managerIcon, mensajesIcon, ajustesIcon;
-        private VisualElement clubMenu, alineacionMenu, competicionMenu, calendarioMenu, fichajesMenu, finanzasMenu,
+        public VisualElement clubMenu, alineacionMenu, competicionMenu, calendarioMenu, fichajesMenu, finanzasMenu,
                               estadioMenu, managerMenu, mensajesMenu;
         private VisualElement mainContainer;
         private Button btnSeguir;
@@ -25,7 +25,7 @@ namespace TacticalEleven.Scripts
         private Equipo miEquipo;
 
         // Elementos Top Menu
-        private Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares,
+        public Label lblInformacion, lblPlantilla, lblEmpleados, lblLesionados, lblManagerFicha, lblManagerPalmares,
                       lblClasificacion, lblResultados, lblEstadisticas, lblPalmaresEquipos, lblPalmaresJugadores,
                       lblIngresos, lblGastos, lblPatrocinadores, lblTelevision, lblPrestamos,
                       lblEstadioInformacion, lblEntradas, lblAmpliaciones,
@@ -416,7 +416,7 @@ namespace TacticalEleven.Scripts
             });
         }
 
-        private void MenuVisibility(List<VisualElement> menus, VisualElement visibleMenu)
+        public void MenuVisibility(List<VisualElement> menus, VisualElement visibleMenu)
         {
             foreach (var menu in menus)
             {
@@ -740,7 +740,7 @@ namespace TacticalEleven.Scripts
             });
         }
 
-        private void CambiarColorTextoClub(List<Label> clubList, Label label)
+        public void CambiarColorTextoClub(List<Label> clubList, Label label)
         {
             foreach (var item in clubList)
             {

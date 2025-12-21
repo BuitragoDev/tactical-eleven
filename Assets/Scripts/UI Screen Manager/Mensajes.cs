@@ -128,15 +128,19 @@ namespace TacticalEleven.Scripts
 
                     if (m.Icono == 0)
                     {
-                        Sprite correoLogoEquipoSprite = Resources.Load<Sprite>($"EscudosEquipos/80x80/{m.IdEquipo}");
+                        Sprite correoLogoEquipoSprite = Resources.Load<Sprite>($"EscudosEquipos/120x120/{m.IdEquipo}");
                         if (correoLogoEquipoSprite != null)
-                            logo.style.backgroundImage = new StyleBackground(correoLogoEquipoSprite);
+                        {
+                            correoLogoEquipo.style.backgroundImage = new StyleBackground(correoLogoEquipoSprite);
+                            correoLogoEquipo.style.width = 120;
+                            correoLogoEquipo.style.height = 120;
+                        }
                     }
                     else
                     {
                         Sprite correoLogoEquipoSprite = Resources.Load<Sprite>($"Jugadores/{m.Icono}");
                         if (correoLogoEquipoSprite != null)
-                            logo.style.backgroundImage = new StyleBackground(correoLogoEquipoSprite);
+                            correoLogoEquipo.style.backgroundImage = new StyleBackground(correoLogoEquipoSprite);
                     }
 
                     marcarLeido.style.display = m.Leido ? DisplayStyle.None : DisplayStyle.Flex;

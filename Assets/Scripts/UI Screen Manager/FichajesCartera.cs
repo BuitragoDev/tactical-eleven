@@ -143,7 +143,7 @@ namespace TacticalEleven.Scripts
 
                 if (DateTime.TryParse(item.FechaInforme, out DateTime fechaInforme))
                 {
-                    if (fechaInforme >= fechaHoy)
+                    if (fechaInforme > fechaHoy)
                     {
                         fila.Add(CreateCell("-", col6, Color.black, TextAnchor.MiddleCenter, false));
                         fila.Add(CreateCell("-", col7, Color.black, TextAnchor.MiddleCenter, false));

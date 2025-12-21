@@ -13,8 +13,9 @@
 }
 
 .correo-logoEquipo {
-    width: 200px;
-    height: 200px;
+    width: 100px;
+    height: 100px;
+    flex-grow: 0;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;

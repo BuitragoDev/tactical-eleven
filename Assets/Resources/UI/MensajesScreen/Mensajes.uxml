@@ -19,7 +19,7 @@
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-grow: 1; width: 100%; height: 85%; flex-direction: row;">
                         <ui:VisualElement style="flex-grow: 1; width: 30%; align-items: center; justify-content: center;">
-                            <ui:VisualElement name="correo-logoEquipo" class="correo-logoEquipo" style="flex-grow: 1; background-image: none;" />
+                            <ui:VisualElement name="correo-logoEquipo" class="correo-logoEquipo" style="background-image: none;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-grow: 1; width: 70%; align-items: flex-start; justify-content: center;">
                             <ui:Label text="-" name="correo-autorMensaje" style="margin-left: 4px; -unity-font-definition: resource(&apos;Fonts/Poppins-SemiBold&apos;); font-size: 48px; padding-left: 2px;" />
