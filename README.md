@@ -93,17 +93,6 @@ Inspiración: patrones tipo **MVVM adaptados a Unity**
 
 ---
 
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Si quieres colaborar:
-
-1. Haz un fork del proyecto
-2. Crea una rama (`feature/nueva-feature`)
-3. Haz commit de tus cambios
-4. Abre un Pull Request
-
----
-
 ## ⚠️ Licencia y uso
 
 Este proyecto **NO es de código abierto para uso libre**.
